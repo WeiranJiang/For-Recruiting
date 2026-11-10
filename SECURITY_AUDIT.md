@@ -112,7 +112,11 @@ Severity uses qualitative CVSS 4.0-style judgement. No formal CVSS vectors were 
 | `npm audit --omit=dev` / `npm audit` | 0 / 12 moderate (dev-only) |
 | Secret scan: regex over full git history (Anthropic, Google API key, OAuth client secret, private keys, DB URLs) | none found. gitleaks itself not run locally; it runs in CI |
 
-Not executed: CodeQL and gitleaks (configured in CI, will run on the next push), DAST (OWASP ZAP), real Google OAuth / Gmail / Calendar flows, production TLS/DNS checks.
+| GitHub Actions on `795f1e1`: lint/typecheck/tests/build · production dependency audit · gitleaks · smoke tests (61 checks on CI runners) · CodeQL | all jobs succeeded |
+| First CI run (`9827358`) | gitleaks flagged a throwaway test value in a usage comment (false positive, now replaced and listed in `.gitleaksignore`). Typecheck failed on a fresh checkout because Next route types weren't generated (fixed: `next typegen` before `tsc`). |
+
+**UNKNOWN:** CodeQL *alerts*. The analysis ran successfully, but this session cannot read code-scanning results (HTTP 403). The owner must review the repository's Security → Code scanning tab.
+Not executed: DAST (OWASP ZAP), real Google OAuth / Gmail / Calendar flows, production TLS/DNS checks.
 
 ---
 
@@ -123,7 +127,7 @@ Not executed: CodeQL and gitleaks (configured in CI, will run on the next push),
 - [x] Medium findings reviewed (F-03…F-08 fixed; O-01…O-03 open with plans)
 - [x] Low findings reviewed
 - [x] Dependencies audited (npm audit; Dependabot configured)
-- [x] Secrets scanned (history regex scan; gitleaks in CI)
+- [x] Secrets scanned (history regex scan; gitleaks in CI: pass)
 - [x] Authentication tested (session flags, revocation, unauthenticated access)
 - [x] Authorization tested (cross-user IDOR suite)
 - [x] API security reviewed
