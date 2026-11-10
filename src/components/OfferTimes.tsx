@@ -51,7 +51,7 @@ export function OfferTimes({ onInsert, onClose, goSetup }: { onInsert: (text: st
   const days = useMemo(() => (data ? byDay(open, data.timezone) : []), [data, open]);
 
   if (err) return <div className="rounded-2xl bg-peach p-4 text-sm text-bad">{err}</div>;
-  if (!data) return <div className="rounded-2xl bg-surface-2 p-4 text-sm text-muted">Finding your open times…</div>;
+  if (!data) return <div className="rounded-2xl bg-surface-2 p-4 text-sm text-muted">Loading…</div>;
 
   const toggle = (iso: string) => setPicked((p) => (p.includes(iso) ? p.filter((x) => x !== iso) : [...p, iso].sort()));
   const chosen = open.filter((s) => picked.includes(s.start));
@@ -63,7 +63,7 @@ export function OfferTimes({ onInsert, onClose, goSetup }: { onInsert: (text: st
           <div className="font-medium">Offer times</div>
           <div className="text-xs text-muted">
             {data.meetingMinutes}-minute slots ·{" "}
-            {data.connected ? (data.calendarError ? `calendar error: ${data.calendarError}` : "busy times from Google Calendar removed") : "Google Calendar not connected"}
+            {data.connected ? (data.calendarError ? `calendar error: ${data.calendarError}` : "synced with Google Calendar") : "calendar not connected"}
             {goSetup && (
               <>
                 {" · "}
@@ -79,7 +79,7 @@ export function OfferTimes({ onInsert, onClose, goSetup }: { onInsert: (text: st
         </button>
       </div>
       {days.length === 0 ? (
-        <p className="text-sm text-muted">No open times in your window. Widen your hours in Setup → Availability.</p>
+        <p className="text-sm text-muted">No open times</p>
       ) : (
         <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
           {days.map(([day, slots]) => (
@@ -107,7 +107,7 @@ export function OfferTimes({ onInsert, onClose, goSetup }: { onInsert: (text: st
         <pre className="whitespace-pre-wrap rounded-xl bg-surface-2 p-3 font-sans text-xs leading-relaxed">{typographize(formatOffer(chosen, data.timezone))}</pre>
       )}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted">{chosen.length} selected · 2–3 options across different days works best</span>
+        <span className="text-xs text-muted">{chosen.length} selected</span>
         <Button variant="primary" disabled={!chosen.length} onClick={() => onInsert(typographize(formatOffer(chosen, data.timezone)))}>
           Insert into email
         </Button>

@@ -37,11 +37,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <Card className="lg:col-span-2">
-        <h2 className="font-display text-[32px] leading-tight">Who do you want to reach?</h2>
-        <p className="mb-3 text-sm text-muted">
-          Describe your targets in plain words: schools, past internships you share, groups, banks, seniority, locations, affinity networks. The
-          people search uses this every time.
-        </p>
+        <h2 className="mb-3 font-display text-[32px] leading-tight">Who do you want to reach?</h2>
         <textarea
           className={inputCls + " min-h-28"}
           value={p.targeting}
@@ -59,10 +55,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-muted">
-          For demographic filters (gender, race, ethnicity), people only count as a match when they&apos;ve publicly self-identified, e.g. through an
-          affinity network, a diversity program, or their own bio. The AI never guesses from names or photos, and every match shows its evidence.
-        </p>
+        <p className="mt-3 text-xs text-muted">Demographic matches only count what people say publicly about themselves.</p>
         <div className="mt-3 flex justify-end">
           <Button variant="primary" onClick={saveProfile} loading={saving}>
             Save targeting
@@ -95,7 +88,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
         <div className="mt-3">
           <Field
             label="Signature block"
-            hint="Leave empty to use the default built from the fields above. Check that your phone number and links look right."
+            hint="Leave empty to use the default."
           >
             <textarea
               className={inputCls + " min-h-24 font-mono text-xs"}
@@ -106,10 +99,10 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
           </Field>
         </div>
         <div className="mt-3 grid gap-3">
-          <Field label="Experience & affiliations you actually have" hint="Internships, clubs, programs. The AI will never claim an affiliation that isn't listed here.">
+          <Field label="Experience & affiliations" hint="Only what’s listed here is ever claimed.">
             <textarea className={inputCls + " min-h-20"} value={p.pastExperience} onChange={set("pastExperience")} />
           </Field>
-          <Field label="Interests" hint="Groups, industries, or questions you genuinely care about">
+          <Field label="Interests">
             <textarea className={inputCls + " min-h-16"} value={p.interests} onChange={set("interests")} />
           </Field>
         </div>
@@ -151,17 +144,13 @@ function Resume({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   };
   return (
     <Card>
-      <h2 className="font-display text-[26px] leading-tight">Resume</h2>
-      <p className="mb-3 text-sm text-muted">
-        Attached to every email by default (you can remove it on any card while swiping). Upload the PDF you want bankers to see; paste the text
-        too so drafts can reference your experience accurately.
-      </p>
+      <h2 className="mb-3 font-display text-[26px] leading-tight">Resume</h2>
       <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-surface-2 p-3 text-sm">
         {me.resume.hasPdf ? (
           <>
             <span>
               📎 {resumeFilename(me.profile.fullName || me.name, me.resume.filename ?? "Resume.pdf")}
-              <span className="ml-1 text-xs text-muted">(sent with this clean name; uploaded as {me.resume.filename})</span>
+              
             </span>
             <a className="text-accent underline" href="/api/resume" target="_blank">
               view
@@ -177,7 +166,7 @@ function Resume({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
             </Button>
           </>
         ) : (
-          <span className="text-muted">No PDF yet. If you only paste text, a simple PDF is generated from it.</span>
+          <span className="text-muted">No PDF yet</span>
         )}
       </div>
       <input ref={fileRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
@@ -185,7 +174,7 @@ function Resume({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
         Upload PDF
       </Button>
       <div className="mt-3">
-        <Field label="Resume text" hint="Paste your resume here. Uploading a PDF fills this in automatically.">
+        <Field label="Resume text">
           <textarea className={inputCls + " min-h-40 font-mono text-xs"} value={text} onChange={(e) => setText(e.target.value)} />
         </Field>
       </div>
@@ -217,16 +206,12 @@ function WritingStyle({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   };
   return (
     <Card className="lg:col-span-2">
-      <h2 className="font-display text-[26px] leading-tight">How your emails should sound</h2>
-      <p className="mb-3 text-sm text-muted">
-        Every draft follows the master writing prompt plus your personal guidelines below. Guidelines update automatically when you edit a draft
-        before swiping right, and whenever you give feedback here.
-      </p>
+      <h2 className="mb-3 font-display text-[26px] leading-tight">Writing style</h2>
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <div className="mb-1 text-[13px] font-medium text-muted">Your learned guidelines ({me.styleGuidelines.length})</div>
           {me.styleGuidelines.length === 0 ? (
-            <p className="rounded-xl bg-surface-2 p-3 text-sm text-muted">None yet. Edit a draft or tell the chat what you like and dislike.</p>
+            <p className="rounded-xl bg-surface-2 p-3 text-sm text-muted">None yet</p>
           ) : (
             <ul className="space-y-1.5">
               {me.styleGuidelines.map((g, i) => (
@@ -262,10 +247,7 @@ function WritingStyle({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
         </button>
         {showGuide && (
           <div className="mt-2">
-            <p className="mb-2 text-xs text-muted">
-              Update the “My background and context” section to match your situation (event, firm, interests). The resume setting in this app
-              overrides the guide&apos;s note about attachments.
-            </p>
+            <p className="mb-2 text-xs text-muted">Edit “My background and context” to fit you.</p>
             <textarea className={inputCls + " min-h-96 font-mono text-xs"} value={guide} onChange={(e) => setGuide(e.target.value)} />
             <div className="mt-2 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => save({ writingGuide: null })} loading={busy}>
@@ -285,11 +267,7 @@ function WritingStyle({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
 function Rules({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   return (
     <Card>
-      <h2 className="font-display text-[26px] leading-tight">Sending rules</h2>
-      <p className="mb-3 text-sm text-muted">
-        Tell it when to send and how to space out emails to the same bank. Swiping right schedules each email in the next slot that obeys these
-        rules.
-      </p>
+      <h2 className="mb-3 font-display text-[26px] leading-tight">Sending rules</h2>
       <ul className="mb-3 space-y-1.5 rounded-2xl bg-butter p-4 text-sm">
         {me.rulesSummary.map((s) => (
           <li key={s}>• {s}</li>
@@ -344,11 +322,8 @@ function Providers({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   };
   return (
     <Card>
-      <h2 className="font-display text-[26px] leading-tight">Email lookup providers (optional)</h2>
-      <p className="mb-3 text-sm text-muted">
-        The AI finds emails from public sources and bank email formats. For verified addresses, add a Hunter.io or Apollo.io API key and choose it
-        when searching. Keys are stored encrypted.
-      </p>
+      <h2 className="font-display text-[26px] leading-tight">Email lookup</h2>
+      <p className="mb-3 text-sm text-muted">Optional, for verified emails.</p>
       <div className="grid gap-3">
         <Field label={`Hunter.io API key ${me.providers.hunter ? "✓ connected" : ""}`}>
           <div className="flex gap-2">

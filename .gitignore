@@ -45,3 +45,4 @@ next-env.d.ts
 !.env.example
 /.next-old-cache/
 /.next-cache-2/
+/.next-cache-3/

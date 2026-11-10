@@ -128,7 +128,7 @@ export function AppShell() {
       </header>
       {!me.gmailConnected && (
         <div className="mb-4 rounded-2xl bg-peach px-4 py-3 text-sm">
-          Gmail isn&apos;t connected. <a className="font-semibold underline underline-offset-2" href="/api/auth/login">Sign in with Google again</a> and allow the Gmail permissions.
+          Gmail isn&apos;t connected. <a className="font-semibold underline underline-offset-2" href="/api/auth/login">Reconnect</a>
         </div>
       )}
       <nav className="sticky top-0 z-20 -mx-4 mb-6 bg-bg/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
@@ -152,8 +152,8 @@ export function AppShell() {
       <main className="animate-rise" key={tab}>
         {tab === "setup" && <Setup me={me} onChange={setMe} />}
         {tab === "find" && <FindPeople me={me} onDone={() => { bump(); setTab("swipe"); }} goSetup={() => setTab("setup")} />}
-        {tab === "swipe" && <SwipeDeck key={version} me={me} onChange={bump} goFind={() => setTab("find")} />}
-        {tab === "review" && <ReviewPile key={version} me={me} onChange={bump} />}
+        {tab === "swipe" && <SwipeDeck key={version} me={me} onChange={bump} goFind={() => setTab("find")} goSetup={() => setTab("setup")} />}
+        {tab === "review" && <ReviewPile key={version} me={me} onChange={bump} goSetup={() => setTab("setup")} />}
         {tab === "queue" && <Queue key={version} onChange={bump} />}
         {tab === "tracker" && <Tracker key={version} me={me} onChange={bump} goSwipe={() => setTab("swipe")} />}
       </main>
@@ -172,10 +172,10 @@ function Logo() {
 
 function Landing() {
   const features: [string, string, string][] = [
-    ["bg-sky", "Find the right people", "Describe who you want to reach: schools, shared internships, groups. Every email comes with an accuracy %."],
-    ["bg-lilac", "Drafts in your voice", "Built from a networking master prompt plus your resume and notes. It learns from every edit you make."],
-    ["bg-butter", "Swipe to send", "Right sends on your schedule rules, resume attached. Left goes to the edit pile. Live proofreading as you type."],
-    ["bg-sage", "Never double-email", "Every send goes through your Gmail and is tracked. Duplicates are blocked; replies and bounces are flagged."],
+    ["bg-sky", "Find the right people", "Describe who you want. Every email gets an accuracy score."],
+    ["bg-lilac", "Drafts in your voice", "Uses your resume and notes. Learns from your edits."],
+    ["bg-butter", "Swipe to send", "Right to send on schedule. Left to edit later."],
+    ["bg-sage", "Never double-email", "Duplicates blocked. Replies and bounces tracked."],
   ];
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -196,8 +196,7 @@ function Landing() {
             Cold emails that sound <em className="text-accent">like you</em>, sent at the right time.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-            Find bankers worth meeting, get drafts that read like a thoughtful student wrote them, swipe right to send through your own Gmail,
-            and watch every reply land in one calm sheet.
+            Find bankers, get drafts in your voice, swipe to send from your Gmail, and track every reply.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <a href="/api/auth/login" className="inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 font-medium text-bg shadow-soft transition hover:opacity-85">
@@ -217,9 +216,6 @@ function Landing() {
           </div>
         ))}
       </section>
-      <p className="pb-10 text-center text-xs text-muted">
-        You&apos;ll be asked to let the app send email and read your inbox (only to detect replies and bounces).
-      </p>
       <Toaster />
     </div>
   );

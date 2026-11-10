@@ -15,7 +15,7 @@ const VIEWS: { id: View; label: string }[] = [
   { id: "new", label: "Not contacted" },
 ];
 
-export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => void; goSwipe: () => void }) {
+export function Tracker({ onChange, goSwipe }: { me: Me; onChange: () => void; goSwipe: () => void }) {
   const [rows, setRows] = useState<SheetRow[] | null>(null);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [view, setView] = useState<View>("all");
@@ -121,14 +121,6 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
           Export CSV
         </a>
       </div>
-
-      {view === "followup" && (
-        <p className="text-sm text-muted">
-          People you emailed at least {me.rules.followUpAfterBusinessDays} business days ago with no reply or bounce, and fewer than {me.rules.maxFollowUps}{" "}
-          follow-ups. Most overdue first. Select them and click “Draft follow-ups”.
-        </p>
-      )}
-
       <div className="flex flex-wrap gap-2">
         <input className={inputCls + " max-w-xs"} placeholder="Search name, bank, group, school…" value={q} onChange={(e) => setQ(e.target.value)} />
         <select className={inputCls + " max-w-48"} value={bank} onChange={(e) => setBank(e.target.value)}>
@@ -324,7 +316,7 @@ function ContactDetail({ row, onSaved }: { row: SheetRow; onSaved: () => void })
         </div>
         {row.autoReplySnippet && row.status !== "Replied" && (
           <div className="rounded-2xl bg-surface-2 p-3">
-            <div className="text-xs font-semibold text-muted">Auto-reply (not counted as a reply)</div>
+            <div className="text-xs font-semibold text-muted">Auto-reply</div>
             {row.autoReplySnippet}
           </div>
         )}
@@ -355,7 +347,7 @@ function ContactDetail({ row, onSaved }: { row: SheetRow; onSaved: () => void })
         </div>
       </div>
       <div className="space-y-2">
-        <Field label="Email address" hint="Editing it sets the source to “you entered” and updates any unsent drafts.">
+        <Field label="Email address">
           <input className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
         <Field label="My notes (where we met, what we discussed)">

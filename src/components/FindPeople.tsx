@@ -70,7 +70,6 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="text-center">
         <h2 className="font-display text-4xl">Who should you meet?</h2>
-        <p className="mt-2 text-sm text-muted">Search the web with your targeting, or paste a list you already have.</p>
       </div>
       <div className="mx-auto flex w-fit gap-1 rounded-full bg-surface-2 p-1">
         {(
@@ -92,7 +91,7 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
       {mode === "search" ? (
         <Card className="space-y-4">
           <div className="rounded-2xl bg-sky p-4 text-sm">
-            <div className="mb-1 text-[13px] font-medium text-muted">Your standing targeting</div>
+            <div className="mb-1 text-[13px] font-medium text-muted">Targeting</div>
             {me.profile.targeting ? (
               <p>{me.profile.targeting}</p>
             ) : (
@@ -118,15 +117,15 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
           </Field>
           {providerPicker}
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-muted">Takes 1–3 minutes. Each person gets an email-accuracy % and an info-accuracy %, with sources.</p>
+            <p className="text-xs text-muted">Takes 1–3 min</p>
             <Button variant="primary" onClick={run} loading={busy} disabled={!query.trim() && !me.profile.targeting.trim()}>
-              {busy ? "Searching…" : "Find people & draft emails"}
+              {busy ? "Searching…" : "Find & draft"}
             </Button>
           </div>
         </Card>
       ) : (
         <Card className="space-y-4">
-          <Field label="Paste people" hint="CSV, spreadsheet rows, LinkedIn copy-paste, or notes. One person per line works best. Add your notes from conversations too.">
+          <Field label="Paste people" hint="One person per line. Any format.">
             <textarea
               className={inputCls + " min-h-48 font-mono text-xs"}
               value={text}
@@ -136,12 +135,12 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
           </Field>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={enrich} onChange={(e) => setEnrich(e.target.checked)} />
-            Look each person up on the web to verify role/bank and fill in missing emails (up to 15 people)
+            Verify on the web and find missing emails
           </label>
           {providerPicker}
           <div className="flex justify-end">
             <Button variant="primary" onClick={run} loading={busy} disabled={!text.trim()}>
-              {busy ? "Working…" : "Import & draft emails"}
+              {busy ? "Working…" : "Import & draft"}
             </Button>
           </div>
         </Card>
@@ -153,10 +152,10 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
             Found {result.found} · added {result.created} · {result.drafted} drafts ready
           </div>
           {result.noEmail.length > 0 && (
-            <p className="text-warn">No email found for: {result.noEmail.join(", ")}. Add one in the Tracker sheet, then draft.</p>
+            <p className="text-warn">No email found: {result.noEmail.join(", ")}</p>
           )}
           {result.skipped.length > 0 && (
-            <p className="text-muted">Skipped (already in your sheet): {result.skipped.map((s) => s.name).join(", ")}</p>
+            <p className="text-muted">Already in your sheet: {result.skipped.map((s) => s.name).join(", ")}</p>
           )}
           {result.errors.length > 0 && <p className="text-bad">{result.errors.join(" · ")}</p>}
           {result.drafted > 0 && (

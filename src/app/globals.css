@@ -24,6 +24,17 @@
   --tint-lilac: #ece9e0;
   --tint-peach: #f8e9e2;
 
+  /* Gmail compose window */
+  --gm-window: #ffffff;
+  --gm-header: #f2f6fc;
+  --gm-header-fg: #041e49;
+  --gm-blue: #0b57d0;
+  --gm-blue-hover: #0a4fbd;
+  --gm-blue-fg: #ffffff;
+  --gm-rule: #e8eaed;
+  --gm-chip: #e8f0fe;
+  --gm-icon: #444746;
+
   --shadow-soft: 0 1px 2px rgb(20 20 19 / 0.04), 0 6px 20px -12px rgb(20 20 19 / 0.12);
   --shadow-lift: 0 1px 3px rgb(20 20 19 / 0.06), 0 18px 40px -20px rgb(20 20 19 / 0.22);
 }
@@ -48,6 +59,16 @@
     --tint-lilac: #2d2c2a;
     --tint-peach: #3a2a24;
 
+    --gm-window: #1f1f1f;
+    --gm-header: #2d2f31;
+    --gm-header-fg: #e3e3e3;
+    --gm-blue: #a8c7fa;
+    --gm-blue-hover: #c2d7fb;
+    --gm-blue-fg: #062e6f;
+    --gm-rule: #3c4043;
+    --gm-chip: #303134;
+    --gm-icon: #c4c7c5;
+
     --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px -12px rgb(0 0 0 / 0.5);
     --shadow-lift: 0 1px 3px rgb(0 0 0 / 0.35), 0 18px 40px -20px rgb(0 0 0 / 0.6);
   }
@@ -69,6 +90,14 @@
   --color-butter: var(--tint-butter);
   --color-lilac: var(--tint-lilac);
   --color-peach: var(--tint-peach);
+  --color-gm-window: var(--gm-window);
+  --color-gm-header: var(--gm-header);
+  --color-gm-header-fg: var(--gm-header-fg);
+  --color-gm-blue: var(--gm-blue);
+  --color-gm-blue-hover: var(--gm-blue-hover);
+  --color-gm-rule: var(--gm-rule);
+  --color-gm-chip: var(--gm-chip);
+  --color-gm-icon: var(--gm-icon);
   --shadow-soft: var(--shadow-soft);
   --shadow-lift: var(--shadow-lift);
   --font-sans: var(--font-geist-sans);
@@ -148,4 +177,22 @@ body {
   .animate-rise {
     animation: none;
   }
+}
+
+/* Gmail-like compose typography */
+.gm-compose {
+  font-family: "Google Sans", Roboto, Arial, var(--font-geist-sans), sans-serif;
+  font-size: 14px;
+}
+.gm-compose .gm-body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.gm-send {
+  background: var(--gm-blue);
+  color: var(--gm-blue-fg);
+}
+.gm-send:hover {
+  background: var(--gm-blue-hover);
 }

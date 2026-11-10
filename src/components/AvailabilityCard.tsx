@@ -57,10 +57,7 @@ export function AvailabilityCard({ me, onChange }: { me: Me; onChange: (m: Me) =
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-[26px] leading-tight">Availability</h2>
-          <p className="mt-1 text-sm text-muted">
-            Used by <span className="font-medium text-fg">🗓 Offer times</span> on every email. Busy time from all your Google calendars is removed
-            automatically; click any slot below to switch it off or back on.
-          </p>
+          <p className="mt-1 text-sm text-muted">Click a slot to stop offering it.</p>
         </div>
         {me.calendarConnected ? (
           <Badge tone="good">Google Calendar connected</Badge>
@@ -141,7 +138,7 @@ export function AvailabilityCard({ me, onChange }: { me: Me; onChange: (m: Me) =
               </select>
             </Field>
           </div>
-          <Field label="Add a one-off window" hint="e.g. an evening you're free that's outside your usual hours">
+          <Field label="Add a one-off window">
             <div className="flex flex-wrap gap-2">
               <input type="date" className={inputCls + " w-auto"} value={extra.date} onChange={(e) => setExtra({ ...extra, date: e.target.value })} />
               <input type="time" className={inputCls + " w-auto"} value={extra.start} onChange={(e) => setExtra({ ...extra, start: e.target.value })} />
@@ -176,7 +173,7 @@ export function AvailabilityCard({ me, onChange }: { me: Me; onChange: (m: Me) =
           {!data ? (
             <p className="rounded-2xl bg-surface-2 p-4 text-sm text-muted">Loading…</p>
           ) : data.slots.length === 0 ? (
-            <p className="rounded-2xl bg-surface-2 p-4 text-sm text-muted">No open slots. Try wider hours or more days.</p>
+            <p className="rounded-2xl bg-surface-2 p-4 text-sm text-muted">No open slots</p>
           ) : (
             <div className="max-h-96 space-y-2 overflow-y-auto rounded-2xl bg-surface-2 p-3">
               {byDay(data.slots, data.timezone).map(([day, slots]) => (

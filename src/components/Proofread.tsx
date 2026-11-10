@@ -266,20 +266,24 @@ export function ProofreadBar({
             <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" /> Checking…
           </span>
         ) : failed && !grammar ? (
-          <span className="text-warn">Proofreading unavailable right now; it will retry when you edit.</span>
+          <span className="text-warn">Proofreading unavailable</span>
         ) : grammar ? (
           <>
             <span className="text-muted">Smoothness</span> <Pct value={grammar.smoothness} />
           </>
         ) : (
-          <span className="text-muted">Proofreading starts automatically</span>
+          <span className="text-muted">Proofreading…</span>
         )}
-        <span className="inline-flex items-center gap-1 text-xs">
-          <span className="gm-dot-error" /> {errors} correctness
-        </span>
-        <span className="inline-flex items-center gap-1 text-xs">
-          <span className="gm-dot-clarity" /> {clarity} clarity
-        </span>
+        {issues.length > 0 && (
+          <>
+            <span className="inline-flex items-center gap-1 text-xs">
+              <span className="gm-dot-error" /> {errors} correctness
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs">
+              <span className="gm-dot-clarity" /> {clarity} clarity
+            </span>
+          </>
+        )}
         {onAcceptAll && issues.length > 1 && (
           <button className="ml-auto rounded-full bg-fg px-3 py-1 text-xs font-semibold text-bg" onClick={onAcceptAll}>
             Accept all
