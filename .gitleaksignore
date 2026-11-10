@@ -1,0 +1,4 @@
+# Documented false positives (see SECURITY_AUDIT.md). Each entry must name a non-secret.
+# Throwaway test value "test-cron-secret-…" in a usage comment of the smoke-test script (commit 9827358); since replaced.
+982735890ff42cb0350471867c4ba36dc1c871ef:scripts/security-smoke.mjs:generic-api-key:6
+982735890ff42cb0350471867c4ba36dc1c871ef:scripts/security-smoke.mjs:generic-api-key:8

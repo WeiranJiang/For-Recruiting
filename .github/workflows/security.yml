@@ -62,8 +62,6 @@ jobs:
     env:
       DEV_LOGIN: "1"
       AI_DAILY_LIMIT: "3"
-      CRON_SECRET: ci-only-cron-secret-0123456789abcdef
-      SESSION_SECRET: ci-only-session-secret-0123456789abcdef0123456789
       DATABASE_URL: pglite:./.data/ci
       APP_URL: http://localhost:3100
       BASE: http://localhost:3100
@@ -73,6 +71,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci --ignore-scripts
+      - name: Generate throwaway test secrets (never real credentials)
+        run: |
+          echo "CRON_SECRET=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
+          echo "SESSION_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
       - name: Start dev server (test-only settings, no real credentials)
         run: npx next dev -p 3100 > server.log 2>&1 &
       - run: npm run security:smoke

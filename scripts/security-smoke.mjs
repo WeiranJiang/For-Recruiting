@@ -2,10 +2,11 @@
 /**
  * Security smoke test (non-destructive; DEV/STAGING ONLY — needs the dev-only demo login).
  *
- * Start a dev server first with test settings, e.g.:
- *   DEV_LOGIN=1 AI_DAILY_LIMIT=3 CRON_SECRET=test-cron-secret-0123456789abcdef DATABASE_URL=pglite:./.data/smoke npx next dev -p 3100
- * Then:
- *   BASE=http://localhost:3100 CRON_SECRET=test-cron-secret-0123456789abcdef node scripts/security-smoke.mjs
+ * Start a dev server first with test settings (CRON_SECRET: any throwaway value, 24+ chars), e.g.:
+ *   export CRON_SECRET="$(openssl rand -hex 16)"
+ *   DEV_LOGIN=1 AI_DAILY_LIMIT=3 DATABASE_URL=pglite:./.data/smoke npx next dev -p 3100
+ * Then, in the same shell:
+ *   BASE=http://localhost:3100 node scripts/security-smoke.mjs
  *
  * Exits non-zero if any check fails (used as a CI security gate).
  */
