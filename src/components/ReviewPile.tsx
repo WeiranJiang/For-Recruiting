@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import { api, fmtTime, type EmailCard, type Me } from "./api";
 import { AccuracyRow, BodyStats, Rationale, Warnings, approve, useBusy } from "./EmailParts";
 import { resumeFilename } from "@/lib/text-rules";
+import { insertBeforeSignoff } from "@/lib/availability";
+import { OfferTimes } from "./OfferTimes";
 import { HighlightTextarea, ProofreadBar, applyIssue, useLiveGrammar } from "./Proofread";
 import type { GrammarIssue } from "./api";
 import { Badge, Button, Card, Field, cx, inputCls, toast } from "./ui";
@@ -73,6 +75,7 @@ function Editor({ e, me, onDone }: { e: EmailCard; me: Me; onDone: () => void })
   const [when, setWhen] = useState(e.requestedAt ? toLocalInput(e.requestedAt) : "");
   const [notes, setNotes] = useState(e.contact.myNotes);
   const { busy, wrap } = useBusy();
+  const [offering, setOffering] = useState(false);
   const live = useLiveGrammar(subject, body, { initial: e.grammar });
   const accept = (i: GrammarIssue) => {
     const ns = i.field === "subject" ? applyIssue(subject, i) : subject;
@@ -176,7 +179,18 @@ function Editor({ e, me, onDone }: { e: EmailCard; me: Me; onDone: () => void })
         >
           Rewrite with my notes
         </Button>
+        <Button onClick={() => setOffering((o) => !o)}>🗓 Offer times</Button>
       </div>
+
+      {offering && (
+        <OfferTimes
+          onClose={() => setOffering(false)}
+          onInsert={(text) => {
+            setOffering(false);
+            setBody(insertBeforeSignoff(body, text));
+          }}
+        />
+      )}
 
       <Field label={`Your notes about ${e.contact.name.split(" ")[0]}`} hint="Where you met, what you talked about. The rewrite uses these as “from my notes”, never as verified fact.">
         <textarea

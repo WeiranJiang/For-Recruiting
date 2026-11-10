@@ -15,6 +15,20 @@
       "when": 1794280692817,
       "tag": "0001_writing_guide",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794285295134,
+      "tag": "0002_calendar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794285336178,
+      "tag": "0003_auto_reply",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { api, type Me, type Profile } from "./api";
 import { Button, Card, Chat, Field, inputCls, toast } from "./ui";
 import { resumeFilename, signatureBlock } from "@/lib/text-rules";
+import { AvailabilityCard } from "./AvailabilityCard";
 
 const TARGET_EXAMPLES = [
   "Penn / Wharton alumni",
@@ -121,6 +122,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
 
       <Resume me={me} onChange={onChange} />
       <WritingStyle me={me} onChange={onChange} />
+      <AvailabilityCard me={me} onChange={onChange} />
       <Rules me={me} onChange={onChange} />
       <Providers me={me} onChange={onChange} />
     </div>

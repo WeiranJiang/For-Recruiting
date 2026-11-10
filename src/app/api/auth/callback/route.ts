@@ -34,12 +34,16 @@ export async function GET(req: Request) {
     id = existing.id;
     await db
       .update(schema.users)
-      .set({ name: info.name ?? existing.name, ...(tokens.refresh_token ? { refreshTokenEnc: encrypt(tokens.refresh_token) } : {}) })
+      .set({
+        name: info.name ?? existing.name,
+        googleScopes: granted,
+        ...(tokens.refresh_token ? { refreshTokenEnc: encrypt(tokens.refresh_token) } : {}),
+      })
       .where(eq(schema.users.id, id));
   } else {
     const [u] = await db
       .insert(schema.users)
-      .values({ email, name: info.name ?? "", refreshTokenEnc: tokens.refresh_token ? encrypt(tokens.refresh_token) : null })
+      .values({ email, name: info.name ?? "", googleScopes: granted, refreshTokenEnc: tokens.refresh_token ? encrypt(tokens.refresh_token) : null })
       .returning();
     id = u.id;
   }

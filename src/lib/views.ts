@@ -6,6 +6,8 @@ import { describeRules, normalizeBank, withDefaults } from "./rules";
 import { providerKeys } from "./contacts";
 import { sheetRow } from "./status";
 import { DEFAULT_WRITING_GUIDE } from "./master-prompt";
+import { calendarConnected } from "./google";
+import { withAvailabilityDefaults } from "./availability";
 
 export function publicUser(u: User) {
   const rules = withDefaults(u.rules);
@@ -24,6 +26,8 @@ export function publicUser(u: User) {
     resume: { filename: u.resumeFilename, hasPdf: !!u.resumePdfB64, hasText: !!u.profile.resumeText },
     providers: { ai: true, hunter: !!keys.hunter, apollo: !!keys.apollo },
     gmailConnected: !!u.refreshTokenEnc,
+    calendarConnected: calendarConnected(u),
+    availability: withAvailabilityDefaults(u.availability),
     lastSyncAt: u.lastSyncAt,
   };
 }

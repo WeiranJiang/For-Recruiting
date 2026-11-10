@@ -17,6 +17,8 @@ send, reply, bounce and follow-up in one sheet.
 | **Swipe** | Card shows To/CC/BCC, subject, body, resume attachment (removable per email), send time and accuracy. **Right** = schedule in the next slot your rules allow (or send now). **Left** = review pile to edit, then swipe right or delete. Arrow keys work too. |
 | **Never double-email** | Each new first email is checked against everything you've sent or scheduled (To/CC/BCC; your default CC/BCC addresses are ignored). |
 | **Tracker sheet** | Name, email, bank, status, first/last sent, replied, follow-ups, accuracy, flags. Filter by bank, status or accuracy. "Follow up now" view; select people to bulk-draft follow-ups (sent as replies in the same Gmail thread). Per-bank reply rates. CSV export. |
+| **Offer times** | Connect Google Calendar (read-only) and set your weekly hours in Setup → Availability. On any email, **🗓 Offer times** shows open slots (busy time from all your calendars removed), pre-picks 2–3 options on different days, and inserts a neatly formatted, correctly dated list. Click any slot in Setup to switch it off. |
+| **Out-of-office** | Auto-replies are detected (headers + subject) and shown separately, so they don't count as a real reply or cancel follow-ups. |
 | **Bounces** | An email is flagged in the sheet only when **every** recipient (To + CC + BCC) bounced, or Gmail refused to send it. If even one address got it, it's not flagged. Note: if you BCC yourself, that copy always goes through, so the email will never count as fully bounced. |
 
 ## Deploy to Vercel (about 15 minutes)
@@ -30,8 +32,8 @@ send, reply, bounce and follow-up in one sheet.
 3. **Note your URL**, e.g. `https://outreach-desk.vercel.app`.
 4. **Google setup** (one time, free):
    1. https://console.cloud.google.com → create a project.
-   2. *APIs & Services → Library* → enable **Gmail API**.
-   3. *OAuth consent screen* → External → fill in the app name/emails → add scopes `gmail.send` and `gmail.readonly` → add yourself under **Test users**.
+   2. *APIs & Services → Library* → enable **Gmail API** and **Google Calendar API**.
+   3. *OAuth consent screen* → External → fill in the app name/emails → add scopes `gmail.send`, `gmail.readonly` and `calendar.readonly` → add yourself under **Test users**.
    4. *Credentials → Create credentials → OAuth client ID → Web application*. Authorized redirect URI:
       `https://YOUR-APP.vercel.app/api/auth/callback`
    5. Copy the client ID/secret into Vercel env vars `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` → *Redeploy*.

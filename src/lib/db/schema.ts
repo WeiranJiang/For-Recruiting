@@ -9,6 +9,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import type { Rules } from "../rules";
+import type { Availability } from "../availability";
 
 export type Profile = {
   fullName: string;
@@ -54,6 +55,9 @@ export const users = pgTable("users", {
   rulesChat: jsonb("rules_chat").$type<{ role: "user" | "assistant"; text: string }[]>().notNull().default([]),
   resumePdfB64: text("resume_pdf_b64"),
   resumeFilename: text("resume_filename"),
+  /** Space-separated OAuth scopes Google granted (to know if Calendar is connected). */
+  googleScopes: text("google_scopes").notNull().default(""),
+  availability: jsonb("availability").$type<Availability | null>(),
   hunterKeyEnc: text("hunter_key_enc"),
   apolloKeyEnc: text("apollo_key_enc"),
   lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
@@ -161,6 +165,9 @@ export const emails = pgTable(
     bouncedRecipients: jsonb("bounced_recipients").$type<string[]>().notNull().default([]),
     deliveryStatus: text("delivery_status").$type<DeliveryStatus>().notNull().default("unknown"),
     repliedAt: timestamp("replied_at", { withTimezone: true }),
+    /** Out-of-office / auto-replies are tracked separately so they don't count as a real reply. */
+    autoReplyAt: timestamp("auto_reply_at", { withTimezone: true }),
+    autoReplySnippet: text("auto_reply_snippet"),
     replySnippet: text("reply_snippet"),
     grammar: jsonb("grammar").$type<GrammarReport | null>(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

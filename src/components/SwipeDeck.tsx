@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, fmtTime, type EmailCard, type Me } from "./api";
 import { AccuracyRow, BodyStats, Rationale, Recipients, Warnings, approve, useBusy } from "./EmailParts";
 import { resumeFilename } from "@/lib/text-rules";
+import { insertBeforeSignoff } from "@/lib/availability";
+import { OfferTimes } from "./OfferTimes";
 import { HighlightedText, ProofreadBar, applyIssue, useLiveGrammar } from "./Proofread";
 import type { GrammarIssue } from "./api";
 import { Badge, Button, Card, cx, toast } from "./ui";
@@ -210,6 +212,7 @@ function ProofedContent({
   patch: (json: Record<string, unknown>) => Promise<void>;
 }) {
   const { grammar, issues, checking, failed, markApplied, dismiss } = useLiveGrammar(e.subject, e.body, { initial: e.grammar });
+  const [offering, setOffering] = useState(false);
   const accept = async (i: GrammarIssue) => {
     const subject = i.field === "subject" ? applyIssue(e.subject, i) : e.subject;
     const body = i.field === "body" ? applyIssue(e.body, i) : e.body;
@@ -263,6 +266,19 @@ function ProofedContent({
         </span>
       </div>
       <ProofreadBar grammar={grammar} issues={issues} checking={checking} failed={failed} onAccept={accept} onDismiss={dismiss} onAcceptAll={acceptAll} showList={false} />
+      {offering ? (
+        <OfferTimes
+          onClose={() => setOffering(false)}
+          onInsert={async (text) => {
+            setOffering(false);
+            await patch({ body: insertBeforeSignoff(e.body, text) });
+          }}
+        />
+      ) : (
+        <div>
+          <Button onClick={() => setOffering(true)}>🗓 Offer times</Button>
+        </div>
+      )}
     </>
   );
 }

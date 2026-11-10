@@ -32,6 +32,8 @@ export type SheetRow = {
   scheduledAt: string | null;
   repliedAt: string | null;
   replySnippet: string | null;
+  autoReplyAt: string | null;
+  autoReplySnippet: string | null;
   emailsSent: number;
   followUpsSent: number;
   flagged: boolean;
@@ -105,6 +107,8 @@ export function sheetRow(c: Contact, emails: Email[], rules: Rules, now = new Da
     scheduledAt: scheduled[0]?.scheduledAt?.toISOString() ?? null,
     repliedAt: replied?.repliedAt?.toISOString() ?? null,
     replySnippet: replied?.replySnippet ?? null,
+    autoReplyAt: live.find((e) => e.autoReplyAt)?.autoReplyAt?.toISOString() ?? null,
+    autoReplySnippet: live.find((e) => e.autoReplyAt)?.autoReplySnippet ?? null,
     emailsSent: sent.length,
     followUpsSent,
     flagged: !!flagReason,

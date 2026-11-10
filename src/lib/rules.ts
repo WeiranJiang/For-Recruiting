@@ -95,7 +95,11 @@ export function normalizeBank(b: string): string {
     .toLowerCase()
     .replace(/&/g, " ")
     .replace(/[.,'’()]/g, " ")
-    .replace(/\b(inc|llc|lp|plc|co|company|group|the|ltd)\b/g, " ")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b(inc|llc|lp|llp|plc|co|company|group|the|ltd|limited|holdings|corp|corporation)\b/g, " ")
+    // regional qualifiers shouldn't split one bank into two (idea from apptrack's company_key)
+    .replace(/\b(usa|uk|emea|apac|americas|europe|asia|international|global|india|canada|new york|london|hong kong)\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   s = ALIASES[s] ?? s;

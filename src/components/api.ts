@@ -1,5 +1,8 @@
 "use client";
 
+import type { Availability } from "@/lib/availability";
+export type { Availability };
+
 export type Rules = {
   timezone: string;
   sendDays: number[];
@@ -50,6 +53,8 @@ export type Me = {
   resume: { filename: string | null; hasPdf: boolean; hasText: boolean };
   providers: { ai: boolean; hunter: boolean; apollo: boolean };
   gmailConnected: boolean;
+  calendarConnected: boolean;
+  availability: Availability;
   lastSyncAt: string | null;
 };
 
@@ -146,6 +151,8 @@ export type SheetRow = {
   scheduledAt: string | null;
   repliedAt: string | null;
   replySnippet: string | null;
+  autoReplyAt: string | null;
+  autoReplySnippet: string | null;
   emailsSent: number;
   followUpsSent: number;
   flagged: boolean;

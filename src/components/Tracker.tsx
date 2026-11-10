@@ -229,6 +229,11 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
                       </div>
                     )}
                     {r.status === "Scheduled" && <div className="text-xs text-muted">{fmtTime(r.scheduledAt)}</div>}
+                    {r.autoReplyAt && r.status !== "Replied" && (
+                      <div className="mt-0.5" title={r.autoReplySnippet ?? ""}>
+                        <Badge>out of office</Badge>
+                      </div>
+                    )}
                   </td>
                   <td className="px-2 py-2 tabular-nums">{fmtDate(r.firstSentAt)}</td>
                   <td className="px-2 py-2 tabular-nums">{fmtDate(r.lastSentAt)}</td>
@@ -317,6 +322,12 @@ function ContactDetail({ row, onSaved }: { row: SheetRow; onSaved: () => void })
           <Pct value={row.infoConfidence} label="Info" />
           <Badge>{row.emailSource}</Badge>
         </div>
+        {row.autoReplySnippet && row.status !== "Replied" && (
+          <div className="rounded-2xl bg-surface-2 p-3">
+            <div className="text-xs font-semibold text-muted">Auto-reply (not counted as a reply)</div>
+            {row.autoReplySnippet}
+          </div>
+        )}
         {row.replySnippet && (
           <div className="rounded-2xl bg-sage p-3">
             <div className="text-xs font-semibold text-good">Their reply</div>

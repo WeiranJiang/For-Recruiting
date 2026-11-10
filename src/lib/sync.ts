@@ -12,6 +12,15 @@ function header(m: gmail_v1.Schema$Message, name: string) {
   return m.payload?.headers?.find((h) => h.name?.toLowerCase() === name.toLowerCase())?.value ?? "";
 }
 
+/** Out-of-office and other automatic replies (RFC 3834 headers + common subjects). */
+export function isAutoReply(m: gmail_v1.Schema$Message) {
+  const auto = header(m, "Auto-Submitted").toLowerCase();
+  if (auto && auto !== "no") return true;
+  if (header(m, "X-Autoreply") || header(m, "X-Autorespond") || header(m, "X-Auto-Response-Suppress").toLowerCase().includes("all")) return true;
+  if (/auto_reply|auto-reply/i.test(header(m, "Precedence"))) return true;
+  return /automatic reply|auto(matic)?[- ]?reply|out of (the )?office|ooo\b|away from (the |my )?office|on leave|on vacation/i.test(header(m, "Subject"));
+}
+
 function isDaemon(from: string) {
   return /mailer-daemon|postmaster|mail delivery (subsystem|system)/i.test(from);
 }
@@ -97,6 +106,8 @@ export async function syncUser(user: User) {
     const sentMs = e.sentAt!.getTime();
     let repliedAt = e.repliedAt;
     let replySnippet = e.replySnippet;
+    let autoReplyAt = e.autoReplyAt;
+    let autoReplySnippet = e.autoReplySnippet;
     const bounced = new Set(e.bouncedRecipients);
 
     for (const m of msgs) {
@@ -106,6 +117,11 @@ export async function syncUser(user: User) {
       const from = header(m, "From").toLowerCase();
       if (isDaemon(from)) {
         failedRecipients(m, recipients).forEach((r) => bounced.add(r));
+      } else if (!from.includes(me) && isAutoReply(m)) {
+        if (!autoReplyAt) {
+          autoReplyAt = new Date(ts);
+          autoReplySnippet = (m.snippet ?? "").slice(0, 300);
+        }
       } else if (!from.includes(me) && !repliedAt) {
         repliedAt = new Date(ts);
         replySnippet = (m.snippet ?? "").slice(0, 300);
@@ -128,12 +144,26 @@ export async function syncUser(user: User) {
       if (ext.length) {
         try {
           const q = `from:(${ext.join(" OR ")}) after:${Math.floor(sentMs / 1000)}`;
-          const list = await gmail.users.messages.list({ userId: "me", q, maxResults: 1 });
-          const hit = list.data.messages?.[0];
-          if (hit) {
-            const m = (await gmail.users.messages.get({ userId: "me", id: hit.id!, format: "metadata" })).data;
+          const list = await gmail.users.messages.list({ userId: "me", q, maxResults: 5 });
+          for (const hit of list.data.messages ?? []) {
+            const m = (
+              await gmail.users.messages.get({
+                userId: "me",
+                id: hit.id!,
+                format: "metadata",
+                metadataHeaders: ["Subject", "Auto-Submitted", "X-Autoreply", "X-Autorespond", "X-Auto-Response-Suppress", "Precedence"],
+              })
+            ).data;
+            if (isAutoReply(m)) {
+              if (!autoReplyAt) {
+                autoReplyAt = new Date(Number(m.internalDate ?? Date.now()));
+                autoReplySnippet = (m.snippet ?? "").slice(0, 300);
+              }
+              continue;
+            }
             repliedAt = new Date(Number(m.internalDate ?? Date.now()));
             replySnippet = (m.snippet ?? "").slice(0, 300);
+            break;
           }
         } catch {
           /* ignore */
@@ -144,13 +174,13 @@ export async function syncUser(user: User) {
     const bouncedArr = [...bounced];
     const delivery = deliveryFor(e, bouncedArr);
     const changed =
-      String(repliedAt) !== String(e.repliedAt) || delivery !== e.deliveryStatus || bouncedArr.length !== e.bouncedRecipients.length;
+      String(repliedAt) !== String(e.repliedAt) || String(autoReplyAt) !== String(e.autoReplyAt) || delivery !== e.deliveryStatus || bouncedArr.length !== e.bouncedRecipients.length;
     if (changed) {
       if (repliedAt && !e.repliedAt) replies++;
       if (delivery === "all_bounced" && e.deliveryStatus !== "all_bounced") bounces++;
       await db
         .update(schema.emails)
-        .set({ repliedAt, replySnippet, bouncedRecipients: bouncedArr, deliveryStatus: delivery, updatedAt: new Date() })
+        .set({ repliedAt, replySnippet, autoReplyAt, autoReplySnippet, bouncedRecipients: bouncedArr, deliveryStatus: delivery, updatedAt: new Date() })
         .where(eq(schema.emails.id, e.id));
     }
   }
