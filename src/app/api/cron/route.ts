@@ -15,13 +15,12 @@ function timingSafeEqualStr(a: string, b: string) {
 
 /**
  * Background worker. Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`.
- * External schedulers (cron-job.org, GitHub Actions) can call /api/cron?key=$CRON_SECRET every 5 minutes.
+ * External schedulers (cron-job.org, GitHub Actions) call /api/cron every 5 minutes with the same header.
  */
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  const url = new URL(req.url);
-  const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const presented = bearer || url.searchParams.get("key") || "";
+  // Header only: secrets in query strings end up in access logs.
+  const presented = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   if (!secret || secret.length < 24 || !timingSafeEqualStr(presented, secret)) {
     return new Response("Unauthorized", { status: 401 });
   }

@@ -6,7 +6,7 @@
 
 **Technology Stack:** Next.js 16.4.6 (App Router, Turbopack) · React 19.3 · TypeScript 5 · Node 22 · Drizzle ORM 0.45 → PostgreSQL (Neon on Vercel; embedded PGlite for local dev) · Google OAuth 2.0 + Gmail API + Calendar API (googleapis 189) · Anthropic Claude API (@anthropic-ai/sdk 1.7) · jose 6 (session JWT) · zod 4 (validation) · Tailwind 4 · Hosting target: Vercel (+ Vercel Cron / external pinger)
 
-**Last Review:** 2026-11-10 (initial assessment, commit after `f41414e`)
+**Last Review:** 2026-11-10 (initial assessment + second pass: nonce CSP, encryption key versioning, prompt-injection fencing, header-only cron, SHA-pinned Actions, dependency updates)
 
 ---
 
@@ -18,15 +18,15 @@
 | Authorization | GREEN | Every user-scoped query filters by `user_id`. Cross-user (IDOR) tests pass for all `:id` routes (F-12 fixed). Single role; no admin endpoints exist. |
 | Database | AMBER | Drizzle parameterized queries everywhere; the only raw SQL (quota, schema bootstrap) is parameterized or static. Credentials are server-only. Least-privilege DB role and backups unverified. |
 | APIs | AMBER | zod validation with size limits, CSRF origin checks, safe errors, AI quota. Per-IP rate limiting not implemented (O-07). |
-| Frontend | AMBER | No `dangerouslySetInnerHTML` or `eval`. Links restricted to http(s). No tokens in browser storage. CSP still allows inline scripts (O-01). |
+| Frontend | GREEN | No `dangerouslySetInnerHTML` or `eval`. Links restricted to http(s). No tokens in browser storage. Per-request nonce CSP with `'strict-dynamic'` (no inline scripts), verified in the browser. |
 | Input Validation | GREEN | Server-side zod on all mutating routes. Email-address and header-injection guards are unit-tested. |
 | File Uploads | GREEN | Resume only: PDF magic bytes, 4 MB cap, stored in DB (not publicly addressable), owner-only download, sandboxed CSP + nosniff, sanitized filename. No malware scanning (low risk; see notes). |
 | Dependencies | AMBER | `npm audit --omit=dev`: 0 vulnerabilities. 12 moderate advisories in dev-only tooling (O-05). |
-| Secrets | GREEN | Git history scan clean. No `NEXT_PUBLIC_*` secrets. Google refresh tokens and provider API keys are AES-256-GCM encrypted at rest. Logs are redacted (F-04). |
+| Secrets | GREEN | Git history scan clean; gitleaks in CI. No `NEXT_PUBLIC_*` secrets. Tokens and keys are AES-256-GCM encrypted with a dedicated, versioned `ENCRYPTION_KEY` (legacy values still readable). Logs are redacted (F-04). |
 | Infrastructure | UNKNOWN | Not deployed. Vercel env scoping, deployment protection and firewall unverified (O-10, O-07). |
 | HTTPS / TLS | UNKNOWN | HSTS + `upgrade-insecure-requests` configured. Certificate, TLS version and redirects can only be checked after deployment. |
-| Security Headers | AMBER | CSP, XFO DENY, nosniff, Referrer-Policy, Permissions-Policy, COOP, CORP and HSTS verified on a local production build with no CSP violations. `script-src 'unsafe-inline'` remains (O-01). |
-| Privacy | AMBER | Account deletion with Google token revocation implemented and tested. Only reply snippets are stored, not full emails. No privacy policy or retention policy yet (O-13). |
+| Security Headers | GREEN | Nonce CSP on pages (unique per request; all Next scripts carry it), `default-src 'none'` CSP on API, XFO DENY, nosniff, Referrer-Policy, Permissions-Policy, COOP, CORP, HSTS. Verified on a local production build with no CSP violations. Must be re-checked on the live domain. |
+| Privacy | AMBER | Account deletion with Google token revocation implemented and tested. Only reply snippets are stored. A `/privacy` page includes Google's Limited Use disclosure. Not legal advice; owner should review. Retention period not yet defined. |
 | Monitoring | AMBER | Redacted error logging only. No alerting or log retention configured (O-08). |
 
 GREEN = verified satisfactory within the assessment scope · AMBER = improvement recommended or incomplete verification · RED = confirmed security problem · UNKNOWN = not inspected or insufficient evidence
@@ -83,19 +83,19 @@ Severity uses qualitative CVSS 4.0-style judgement. No formal CVSS vectors were 
 
 | ID | Title | Severity | Status |
 |---|---|---|---|
-| O-01 | CSP allows `'unsafe-inline'` scripts | Medium | Planned (nonce CSP) |
+| O-01 | CSP allowed `'unsafe-inline'` scripts | Medium | **Fixed** (2nd pass): nonce CSP via `src/proxy.ts` |
 | O-02 | `gmail.readonly` is a Google *restricted* scope; public launch needs verification and a security assessment | Medium (compliance) | Owner decision |
-| O-03 | Prompt injection via researched web content (stored notes feed drafting) | Medium | Partially mitigated (human review before send; no side-effect tools) |
-| O-04 | Encryption key derived from `SESSION_SECRET` (shared with JWT signing, no key versioning) | Low | Planned |
+| O-03 | Prompt injection via researched web content (stored notes feed drafting) | Medium | **Mitigated** (2nd pass): untrusted data fenced in prompts with explicit rules; any link in a draft triggers a warning; human approval required to send; the model has no side-effect tools. Residual risk accepted. |
+| O-04 | Encryption key derived from `SESSION_SECRET` | Low | **Fixed** (2nd pass): `ENCRYPTION_KEY` with `v2.` versioning + `ENCRYPTION_KEY_PREVIOUS` rotation; unit-tested |
 | O-05 | 12 moderate advisories in dev-only tooling | Low | Accepted exception |
-| O-06 | Cron secret still accepted via `?key=` | Low | Remove after the pinger switches to the header |
+| O-06 | Cron secret accepted via `?key=` | Low | **Fixed** (2nd pass): header only; regression test added |
 | O-07 | No per-IP / burst rate limiting (non-AI routes) | Low | Use Vercel Firewall rate-limit rules |
 | O-08 | No monitoring/alerting | Low | Planned |
 | O-09 | Backups / restore unverified | Low | Verify Neon PITR on the chosen plan |
 | O-10 | Vercel env scoping and preview deployment protection unverified | Low | Pre-launch check |
-| O-11 | GitHub Actions pinned to tags, not commit SHAs | Info | Planned |
+| O-11 | GitHub Actions pinned to tags | Info | **Fixed** (2nd pass): pinned to commit SHAs and upgraded to Node 24 releases (gitleaks v2 relied on the deprecated Node 20 runtime) |
 | O-12 | Absolute 14-day session, no idle timeout | Info | Accepted for now |
-| O-13 | No privacy policy / data-retention statement | Info (privacy) | Owner action before public launch |
+| O-13 | No privacy policy | Info (privacy) | **Mostly fixed**: `/privacy` page added; owner should review it and decide a retention period |
 | O-14 | `.env.example` lacks the new variables (agent could not edit `.env*` files) | Info | Owner action: add `ALLOWED_EMAILS`, `OPEN_SIGNUPS`, `AI_DAILY_LIMIT` |
 
 ---
@@ -104,8 +104,8 @@ Severity uses qualitative CVSS 4.0-style judgement. No formal CVSS vectors were 
 
 | Test | Result |
 |---|---|
-| `npm test` (10 security unit tests) | 10/10 pass |
-| `scripts/security-smoke.mjs` against dev server (61 checks: unauth 401s, IDOR ×9, CSRF ×3, validation ×5, upload ×5, error disclosure, quota, headers ×9, cookie flags, revocation, account deletion) | 61/61 pass (after fixing F-12) |
+| `npm test` (security + encryption unit tests) | 11/11 pass |
+| `scripts/security-smoke.mjs` against dev server (67 checks after the 2nd pass: unauth 401s, IDOR ×9, CSRF ×3, validation ×5, upload ×5, error disclosure, quota, headers ×9, cookie flags, revocation, account deletion) | 61/61 pass (after fixing F-12) |
 | `npm run lint`, `npm run typecheck`, `next build` | pass |
 | CSP violation check (Playwright): dev, logged in, every tab · prod build, landing page | none |
 | Prod build: dev-login disabled even with `DEV_LOGIN=1` | 404 ✅ |

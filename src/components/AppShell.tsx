@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { api, type Me } from "./api";
 import { Button, Toaster, cx, toast } from "./ui";
 import { Setup } from "./Setup";
@@ -216,6 +217,11 @@ function Landing() {
           </div>
         ))}
       </section>
+      <footer className="pb-10 text-center text-xs text-muted">
+        <Link href="/privacy" className="hover:text-fg">
+          Privacy
+        </Link>
+      </footer>
       <Toaster />
     </div>
   );

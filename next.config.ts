@@ -3,25 +3,10 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 /**
- * Content-Security-Policy.
- * - Everything (scripts, fonts via next/font, API calls) is same-origin; no third-party scripts.
- * - 'unsafe-inline' for scripts is required by Next's inline bootstrap without a nonce proxy.
- *   Tracked as a hardening item (SECURITY_REMEDIATION.md: move to nonce-based CSP).
- * - Dev needs 'unsafe-eval' + websockets for hot reload.
+ * Page CSP (nonce-based) is set per request in src/proxy.ts.
+ * API responses are JSON/PDF only, so they get a lock-down CSP here.
  */
-const csp = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
-].join("; ");
+const apiCsp = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
 const common = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -46,8 +31,10 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      // Everything except the resume PDF (which sets its own sandboxed CSP so the browser PDF viewer works).
-      { source: "/((?!api/resume).*)", headers: [...common, { key: "Content-Security-Policy", value: csp }] },
+      // Pages: common headers here, CSP with a per-request nonce from src/proxy.ts.
+      { source: "/((?!api/).*)", headers: common },
+      // API (except the resume PDF, which sets its own sandboxed CSP so the browser PDF viewer works).
+      { source: "/api/((?!resume).*)", headers: [...common, { key: "Content-Security-Policy", value: apiCsp }] },
       { source: "/api/resume", headers: common },
       // API responses carry personal data: never cache.
       { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "private, no-store" }] },

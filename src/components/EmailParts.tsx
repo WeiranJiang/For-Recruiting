@@ -42,6 +42,9 @@ export function Warnings({ e }: { e: EmailCard }) {
   const ph = findPlaceholders(`${e.subject}\n${e.body}`);
   if (ph.length) w.push({ tone: "bad", text: `Fill in ${ph.join(", ")} before sending` });
   for (const d of findDateIssues(e.body)) w.push({ tone: "bad", text: `Date check: ${d.message}.` });
+  // Prompt-injection / accidental-link guard: drafts rarely need links, so surface any.
+  const links = [...new Set(e.body.match(/https?:\/\/[^\s)>\]]+|www\.[^\s)>\]]+/gi) ?? [])];
+  if (links.length) w.push({ tone: "warn", text: `Contains a link: ${links.slice(0, 2).join(", ")}. Make sure you meant to include it.` });
   if (e.error) w.push({ tone: "bad", text: e.error });
   if (!w.length) return null;
   return (

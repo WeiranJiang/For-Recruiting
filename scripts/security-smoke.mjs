@@ -55,7 +55,8 @@ const call = (cookie, path, init = {}) =>
 
   // ---- 2. cron requires the secret
   ok("cron without secret -> 401", (await call("", "/api/cron")).status === 401);
-  ok("cron with wrong secret -> 401", (await call("", "/api/cron?key=wrong")).status === 401);
+  ok("cron with wrong secret -> 401", (await call("", "/api/cron", { headers: { authorization: "Bearer wrong" } })).status === 401);
+  if (CRON_SECRET) ok("cron secret in query string is NOT accepted -> 401", (await call("", `/api/cron?key=${CRON_SECRET}`)).status === 401);
   if (CRON_SECRET) ok("cron with Bearer secret -> 200", (await call("", "/api/cron", { headers: { authorization: `Bearer ${CRON_SECRET}` } })).status === 200);
 
   // ---- 3. object-level authorization (IDOR) between two users
@@ -141,6 +142,12 @@ const call = (cookie, path, init = {}) =>
   const h = (k) => home.headers.get(k) ?? "";
   ok("CSP present with frame-ancestors 'none'", h("content-security-policy").includes("frame-ancestors 'none'"));
   ok("CSP object-src 'none'", h("content-security-policy").includes("object-src 'none'"));
+  ok("CSP script-src uses a nonce, no 'unsafe-inline'", /script-src[^;]*'nonce-/.test(h("content-security-policy")) && !/script-src[^;]*unsafe-inline/.test(h("content-security-policy")));
+  const home2 = await fetch(`${BASE}/`);
+  ok("CSP nonce is unique per request", (home2.headers.get("content-security-policy") ?? "") !== h("content-security-policy"));
+  const apiCsp = (await call(alice, "/api/contacts")).headers.get("content-security-policy") ?? "";
+  ok("API responses get lock-down CSP", apiCsp.includes("default-src 'none'"));
+  ok("privacy page is public", (await fetch(`${BASE}/privacy`)).status === 200);
   ok("X-Frame-Options DENY", h("x-frame-options") === "DENY");
   ok("X-Content-Type-Options nosniff", h("x-content-type-options") === "nosniff");
   ok("Referrer-Policy set", h("referrer-policy") === "strict-origin-when-cross-origin");

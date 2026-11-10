@@ -29,6 +29,7 @@ send, reply, bounce and follow-up in one sheet.
    - `SESSION_SECRET`, `CRON_SECRET`: any long random strings (e.g. `openssl rand -hex 32`)
    - `ALLOWED_EMAILS`: **required**: your email (and friends'), comma-separated, or `@yourschool.edu`. Without it nobody can sign in
      (secure default; set `OPEN_SIGNUPS=1` only if you really want anyone with Google to use your AI credits).
+   - `ENCRYPTION_KEY`: another long random string. Encrypts stored Google sign-ins and API keys. Keep it forever, or rotate it via `ENCRYPTION_KEY_PREVIOUS`.
    - Optional: `AI_DAILY_LIMIT` (per-user daily AI budget in cost units, default 600).
 2. **Add a database**: in the Vercel project → *Storage* → *Create Database* → **Neon (Postgres)** → connect it to the project.
    This sets `DATABASE_URL` automatically. Tables are created on first request.

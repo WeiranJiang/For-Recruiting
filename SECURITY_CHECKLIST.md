@@ -18,10 +18,11 @@ Run through this for every change. CI enforces the items marked ⛔.
 - [ ] Schema changes: `npx drizzle-kit generate && node scripts/gen-schema-sql.mjs`. New columns must be additive with defaults, so the bootstrap SQL stays idempotent.
 
 ## Frontend
+- [ ] Every page calls `await connection()` (or is otherwise dynamic). The CSP nonce from `src/proxy.ts` only reaches dynamically rendered pages; a static page's scripts would be blocked.
 - [ ] No `dangerouslySetInnerHTML`, `eval`, `new Function`.
 - [ ] Any URL from data goes through `safeHref()` before it reaches an `href`.
 - [ ] No tokens or personal data in `localStorage`.
-- [ ] No third-party scripts. If one is ever needed, update the CSP in `next.config.ts` deliberately.
+- [ ] No third-party scripts. If one is ever needed, update the CSP in `src/proxy.ts` deliberately.
 
 ## Email / AI specifics
 - [ ] Anything that ends up in a MIME header goes through `encodeHeader()` and validation. Addresses go through `isValidEmail()`.
