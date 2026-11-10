@@ -2,13 +2,15 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
 import { handle, requireUser } from "@/lib/session";
+import { AI_COST, chargeAi } from "@/lib/quota";
+import { userError } from "@/lib/errors";
 import { researchPeople } from "@/lib/ai";
 import { draftMany, saveResearched } from "@/lib/contacts";
 
 export const maxDuration = 300;
 
 const Body = z.object({
-  query: z.string().default(""),
+  query: z.string().max(500).default(""),
   count: z.number().int().min(1).max(15).default(5),
   provider: z.enum(["ai", "hunter", "apollo"]).default("ai"),
   draft: z.boolean().default(true),
@@ -19,7 +21,8 @@ export const POST = handle(async (req: Request) => {
   const u = await requireUser();
   const b = Body.parse(await req.json());
   if (!b.query.trim() && !u.profile.targeting.trim())
-    throw new Error("Describe who you want to reach (Setup → Targeting) or type a search.");
+    throw userError("Describe who you want to reach (Setup → Targeting) or type a search.");
+  await chargeAi(u.id, AI_COST.research(b.count));
   const db = await getDb();
   const existing = await db.select({ name: schema.contacts.name, bank: schema.contacts.bank }).from(schema.contacts).where(eq(schema.contacts.userId, u.id));
   const people = await researchPeople({

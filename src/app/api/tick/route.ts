@@ -1,3 +1,4 @@
+import { logError } from "@/lib/errors";
 import { handle, requireUser } from "@/lib/session";
 import { processDue } from "@/lib/send";
 import { syncUser } from "@/lib/sync";
@@ -14,7 +15,8 @@ export const POST = handle(async (req: Request) => {
     try {
       sync = await syncUser(u);
     } catch (e) {
-      sync = { error: (e as Error).message };
+      logError("sync", e);
+      sync = { error: "Couldn't check Gmail. Try signing out and back in." };
     }
   }
   return Response.json({ sent, sync });

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/errors";
 import { after } from "next/server";
 import { z } from "zod";
 import { handle, requireUser } from "@/lib/session";
@@ -13,6 +14,6 @@ export const POST = handle(async (req: Request, ctx: RouteContext<"/api/emails/[
   const { force } = z.object({ force: z.boolean().optional() }).parse(await req.json().catch(() => ({})));
   const res = await approveEmail(u, id, { force });
   // After responding, learn from how the user edited the AI draft (if they did).
-  if (res.ok) after(() => learnFromApprovedEdit(u.id, id).catch((e) => console.error("learn failed", e)));
+  if (res.ok) after(() => learnFromApprovedEdit(u.id, id).catch((e) => logError("learn", e)));
   return Response.json(res, { status: res.ok ? 200 : 422 });
 });

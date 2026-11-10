@@ -61,6 +61,10 @@ export const users = pgTable("users", {
   hunterKeyEnc: text("hunter_key_enc"),
   apolloKeyEnc: text("apollo_key_enc"),
   lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
+  /** Bumped on sign-out; tokens carrying an older version are rejected. */
+  sessionVersion: integer("session_version").notNull().default(0),
+  /** Per-user daily AI call counter (cost-abuse protection). */
+  aiUsage: jsonb("ai_usage").$type<{ day: string; count: number } | null>(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

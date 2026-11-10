@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { handle, requireUser } from "@/lib/session";
+import { AI_COST, chargeAi } from "@/lib/quota";
+import { userError } from "@/lib/errors";
 import { lookupSpecificPeople, parseImport, type ResearchedPerson } from "@/lib/ai";
 import { draftMany, saveResearched } from "@/lib/contacts";
 
 export const maxDuration = 300;
 
 const Body = z.object({
-  text: z.string().min(1),
+  text: z.string().min(1).max(100_000),
   enrich: z.boolean().default(false), // look each person up on the web to fill gaps + score accuracy
   provider: z.enum(["ai", "hunter", "apollo"]).default("ai"),
   draft: z.boolean().default(true),
@@ -16,8 +18,9 @@ const Body = z.object({
 export const POST = handle(async (req: Request) => {
   const u = await requireUser();
   const b = Body.parse(await req.json());
+  await chargeAi(u.id, AI_COST.importParse + (b.enrich ? AI_COST.importEnrich : 0));
   const parsed = await parseImport(b.text);
-  if (!parsed.length) throw new Error("Couldn't find any people in that text.");
+  if (!parsed.length) throw userError("Couldn't find any people in that text.");
   let people: ResearchedPerson[] = parsed.map((p) => ({
     ...p,
     bankDomain: p.email.includes("@") ? p.email.split("@")[1] : "",

@@ -1,4 +1,5 @@
 import "server-only";
+import { HttpError, logError, safeMessage } from "./errors";
 import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "./db";
 import type { Contact, Email, User } from "./db/schema";
@@ -6,7 +7,7 @@ import { draftEmail, type DraftResult, type ResearchedPerson } from "./ai";
 import { DEFAULT_WRITING_GUIDE } from "./master-prompt";
 import { apolloFind, hunterFind } from "./providers";
 import { decrypt } from "./crypto";
-import { cleanList } from "./mime";
+import { cleanList, safeUrl } from "./mime";
 import { normalizeBank, withDefaults } from "./rules";
 
 export type EmailProvider = "ai" | "hunter" | "apollo";
@@ -40,7 +41,8 @@ async function improveEmail(user: User, p: ResearchedPerson, provider: EmailProv
     }
     return { email: p.email, conf: clamp(p.emailConfidence), source: "ai", note: `${provider}: no match. ${p.emailBasis}` };
   } catch (e) {
-    return { email: p.email, conf: clamp(p.emailConfidence), source: "ai", note: `${provider} failed (${(e as Error).message}). ${p.emailBasis}` };
+    logError(`lookup:${provider}`, e);
+    return { email: p.email, conf: clamp(p.emailConfidence), source: "ai", note: `${provider} lookup failed. ${p.emailBasis}` };
   }
 }
 
@@ -75,10 +77,10 @@ export async function saveResearched(user: User, people: ResearchedPerson[], pro
         group: p.group,
         location: p.location,
         school: p.school,
-        linkedinUrl: p.linkedinUrl,
+        linkedinUrl: safeUrl(p.linkedinUrl),
         matchReasons: p.matchReasons,
         notes: [p.notes, em.note ? `Email: ${em.note}` : ""].filter(Boolean).join("\n"),
-        sources: p.sources,
+        sources: p.sources.map((s) => ({ url: safeUrl(s.url), title: String(s.title ?? "").slice(0, 200) })).filter((s) => s.url).slice(0, 12),
         emailConfidence: email ? em.conf : 0,
         infoConfidence: clamp(p.infoConfidence),
         emailSource: em.source,
@@ -141,7 +143,8 @@ export async function draftMany(user: User, contactList: Contact[]) {
       try {
         out.push(await createDraft(user, c, "initial"));
       } catch (e) {
-        errors.push(`${c.name}: ${(e as Error).message}`);
+        if (!(e instanceof HttpError)) logError("draft", e);
+        errors.push(`${c.name}: ${safeMessage(e)}`);
       }
     }
   }

@@ -2,24 +2,16 @@ import "server-only";
 import { and, eq, gte, inArray } from "drizzle-orm";
 import type { gmail_v1 } from "googleapis";
 import { getDb, schema } from "./db";
-import type { Email, User, DeliveryStatus } from "./db/schema";
+import type { User } from "./db/schema";
 import { gmailFor } from "./google";
+import { deliveryFor, header, isAutoReply } from "./mail-signals";
+
+export { deliveryFor, isAutoReply };
 import { EMAIL_RE, cleanList } from "./mime";
 
 type Gmail = gmail_v1.Gmail;
 
-function header(m: gmail_v1.Schema$Message, name: string) {
-  return m.payload?.headers?.find((h) => h.name?.toLowerCase() === name.toLowerCase())?.value ?? "";
-}
 
-/** Out-of-office and other automatic replies (RFC 3834 headers + common subjects). */
-export function isAutoReply(m: gmail_v1.Schema$Message) {
-  const auto = header(m, "Auto-Submitted").toLowerCase();
-  if (auto && auto !== "no") return true;
-  if (header(m, "X-Autoreply") || header(m, "X-Autorespond") || header(m, "X-Auto-Response-Suppress").toLowerCase().includes("all")) return true;
-  if (/auto_reply|auto-reply/i.test(header(m, "Precedence"))) return true;
-  return /automatic reply|auto(matic)?[- ]?reply|out of (the )?office|ooo\b|away from (the |my )?office|on leave|on vacation/i.test(header(m, "Subject"));
-}
 
 function isDaemon(from: string) {
   return /mailer-daemon|postmaster|mail delivery (subsystem|system)/i.test(from);
@@ -41,17 +33,6 @@ function failedRecipients(m: gmail_v1.Schema$Message, recipients: string[]): str
   return recipients.filter((r) => mentioned.has(r));
 }
 
-/**
- * Delivery rule (as requested): an email is flagged as undelivered only when EVERY
- * recipient (To + CC + BCC) bounced. If even one went through it is "delivered" (or "partial_bounce").
- */
-export function deliveryFor(e: Pick<Email, "to" | "cc" | "bcc">, bounced: string[]): DeliveryStatus {
-  const all = cleanList([...e.to, ...e.cc, ...e.bcc]);
-  const b = new Set(cleanList(bounced));
-  const n = all.filter((a) => b.has(a)).length;
-  if (n === 0) return "delivered";
-  return n >= all.length ? "all_bounced" : "partial_bounce";
-}
 
 async function getFull(gmail: Gmail, id: string) {
   return (await gmail.users.messages.get({ userId: "me", id, format: "full" })).data;

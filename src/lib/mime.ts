@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-function encodeHeader(v: string) {
+export function encodeHeader(v: string) {
   // RFC 2047 encode non-ASCII header values
   return /^[\x20-\x7e]*$/.test(v) ? v : `=?UTF-8?B?${Buffer.from(v, "utf8").toString("base64")}?=`;
 }
@@ -98,4 +98,15 @@ export function cleanList(list: string[] | string | undefined | null): string[] 
 
 export function isValidEmail(s: string) {
   return /^[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(s);
+}
+
+/** Only http(s) URLs survive; anything else (javascript:, data:, vbscript:...) becomes "". */
+export function safeUrl(u: string | null | undefined): string {
+  if (!u) return "";
+  try {
+    const url = new URL(u.trim());
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
 }

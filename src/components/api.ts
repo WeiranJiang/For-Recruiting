@@ -200,3 +200,14 @@ export function fmtDate(iso: string | null | undefined) {
 export function wordCount(s: string) {
   return s.trim() ? s.trim().split(/\s+/).length : 0;
 }
+
+/** Render-time guard: only http(s) links are ever put in an href. */
+export function safeHref(u: string | null | undefined): string | undefined {
+  if (!u) return undefined;
+  try {
+    const url = new URL(u);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}

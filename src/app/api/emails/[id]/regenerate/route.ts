@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { handle, HttpError, requireUser } from "@/lib/session";
+import { AI_COST, chargeAi } from "@/lib/quota";
 import { draftEmail } from "@/lib/ai";
 import { withDefaults } from "@/lib/rules";
 import { rationaleOf, userGuide } from "@/lib/contacts";
@@ -20,6 +21,7 @@ export const POST = handle(async (_req: Request, ctx: RouteContext<"/api/emails/
   const parent = row.e.parentEmailId
     ? (await db.select().from(schema.emails).where(eq(schema.emails.id, row.e.parentEmailId)))[0]
     : null;
+  await chargeAi(u.id, AI_COST.draft);
   const d = await draftEmail({
     profile: u.profile,
     rules: withDefaults(u.rules),

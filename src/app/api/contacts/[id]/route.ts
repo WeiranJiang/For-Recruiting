@@ -3,19 +3,20 @@ import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
 import { handle, HttpError, requireUser } from "@/lib/session";
 import { getContact } from "@/lib/contacts";
+import { isValidEmail, safeUrl } from "@/lib/mime";
 
 const Patch = z
   .object({
-    name: z.string(),
-    email: z.string(),
-    bank: z.string(),
-    title: z.string(),
-    group: z.string(),
-    location: z.string(),
-    school: z.string(),
-    linkedinUrl: z.string(),
-    notes: z.string(),
-    myNotes: z.string(),
+    name: z.string().max(200),
+    email: z.string().max(320),
+    bank: z.string().max(200),
+    title: z.string().max(200),
+    group: z.string().max(200),
+    location: z.string().max(200),
+    school: z.string().max(200),
+    linkedinUrl: z.string().max(500),
+    notes: z.string().max(5000),
+    myNotes: z.string().max(5000),
     emailConfidence: z.number().int().min(0).max(100),
     infoConfidence: z.number().int().min(0).max(100),
   })
@@ -29,6 +30,8 @@ export const PATCH = handle(async (req: Request, ctx: RouteContext<"/api/contact
   const b = Patch.parse(await req.json());
   const db = await getDb();
   const set: Partial<typeof c> = { ...b };
+  if (b.linkedinUrl !== undefined) set.linkedinUrl = safeUrl(b.linkedinUrl);
+  if (b.email !== undefined && b.email.trim() && !isValidEmail(b.email.trim())) throw new HttpError(400, "That email address doesn't look valid.");
   if (b.email !== undefined) {
     set.email = b.email.trim().toLowerCase();
     if (set.email !== c.email && b.emailConfidence === undefined) {

@@ -6,31 +6,31 @@ import { cleanList } from "@/lib/mime";
 
 const Patch = z
   .object({
-    to: z.union([z.array(z.string()), z.string()]),
-    cc: z.union([z.array(z.string()), z.string()]),
-    bcc: z.union([z.array(z.string()), z.string()]),
-    subject: z.string(),
-    body: z.string(),
+    to: z.union([z.array(z.string().max(320)).max(20), z.string().max(4000)]),
+    cc: z.union([z.array(z.string().max(320)).max(20), z.string().max(4000)]),
+    bcc: z.union([z.array(z.string().max(320)).max(20), z.string().max(4000)]),
+    subject: z.string().max(300),
+    body: z.string().max(20_000),
     attachResume: z.boolean(),
-    requestedAt: z.string().nullable(), // ISO time to force a send time; null = follow rules
+    requestedAt: z.string().datetime({ offset: true }).nullable(), // ISO time to force a send time; null = follow rules
     status: z.enum(["pending", "review"]), // swipe left = "review"; unschedule = "review"
     // Remaining proofreading suggestions after the user accepted one (so they survive the edit).
     grammar: z
       .object({
         smoothness: z.number(),
-        summary: z.string(),
+        summary: z.string().max(1000),
         issues: z.array(
           z.object({
             field: z.enum(["subject", "body"]),
             type: z.enum(["spelling", "grammar", "clarity"]),
-            original: z.string(),
-            suggestion: z.string(),
-            reason: z.string(),
+            original: z.string().max(2000),
+            suggestion: z.string().max(2000),
+            reason: z.string().max(300),
           }),
-        ),
-        correctedSubject: z.string(),
-        correctedBody: z.string(),
-        checkedAt: z.string(),
+        ).max(50),
+        correctedSubject: z.string().max(300),
+        correctedBody: z.string().max(20_000),
+        checkedAt: z.string().max(40),
       })
       .nullable(),
   })

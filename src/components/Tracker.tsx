@@ -1,6 +1,6 @@
 "use client";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { api, fmtDate, fmtTime, type Me, type SheetRow } from "./api";
+import { api, fmtDate, fmtTime, safeHref, type Me, type SheetRow } from "./api";
 import { Badge, Button, Card, Field, Pct, StatusBadge, cx, inputCls, toast } from "./ui";
 
 type Bank = { bank: string; contacts: number; sent: number; replied: number; bounced: number; scheduled: number };
@@ -335,12 +335,12 @@ function ContactDetail({ row, onSaved }: { row: SheetRow; onSaved: () => void })
         {row.notes && <p className="whitespace-pre-wrap text-muted">{row.notes}</p>}
         <div className="flex flex-wrap gap-x-3 text-xs">
           {row.linkedinUrl && (
-            <a className="text-accent underline" href={row.linkedinUrl} target="_blank" rel="noreferrer">
+            <a className="text-accent underline" href={safeHref(row.linkedinUrl)} target="_blank" rel="noopener noreferrer">
               LinkedIn
             </a>
           )}
           {row.sources.slice(0, 5).map((s, i) => (
-            <a key={i} className="max-w-48 truncate text-accent underline" href={s.url} target="_blank" rel="noreferrer">
+            <a key={i} className="max-w-48 truncate text-accent underline" href={safeHref(s.url)} target="_blank" rel="noopener noreferrer">
               {s.title || s.url}
             </a>
           ))}

@@ -118,6 +118,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
       <AvailabilityCard me={me} onChange={onChange} />
       <Rules me={me} onChange={onChange} />
       <Providers me={me} onChange={onChange} />
+      <DangerZone me={me} />
     </div>
   );
 }
@@ -337,6 +338,34 @@ function Providers({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
             <Button onClick={() => save({ apolloKey: apollo })}>{apollo ? "Save" : me.providers.apollo ? "Remove" : "Save"}</Button>
           </div>
         </Field>
+      </div>
+    </Card>
+  );
+}
+
+function DangerZone({ me }: { me: Me }) {
+  return (
+    <Card className="lg:col-span-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-[26px] leading-tight">Delete account</h2>
+          <p className="text-sm text-muted">Removes all your data here and disconnects Google. Sent emails stay in Gmail.</p>
+        </div>
+        <Button
+          variant="danger"
+          onClick={async () => {
+            const typed = window.prompt(`Type your email (${me.email}) to permanently delete your account.`);
+            if (typed?.trim().toLowerCase() !== me.email) return;
+            try {
+              await api("/api/me", { method: "DELETE", json: { confirm: me.email } });
+              window.location.reload();
+            } catch (e) {
+              toast((e as Error).message, "bad");
+            }
+          }}
+        >
+          Delete my account
+        </Button>
       </div>
     </Card>
   );

@@ -2,15 +2,16 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
 import { handle, requireUser } from "@/lib/session";
+import { AI_COST, chargeAi } from "@/lib/quota";
 import { updateStyleFromChat } from "@/lib/ai";
 import { publicUser } from "@/lib/views";
 
 export const maxDuration = 60;
 
 const Body = z.object({
-  message: z.string().optional(), // writing feedback in plain words
-  guidelines: z.array(z.string()).optional(), // direct edit of the learned list
-  writingGuide: z.string().nullable().optional(), // edit the master prompt; null = restore default
+  message: z.string().max(2000).optional(), // writing feedback in plain words
+  guidelines: z.array(z.string().max(400)).max(40).optional(), // direct edit of the learned list
+  writingGuide: z.string().max(40_000).nullable().optional(), // edit the master prompt; null = restore default
 });
 
 export const POST = handle(async (req: Request) => {
@@ -22,6 +23,7 @@ export const POST = handle(async (req: Request) => {
   if (b.writingGuide !== undefined) set.writingGuide = b.writingGuide;
   if (b.guidelines) set.styleGuidelines = b.guidelines.map((g) => g.trim()).filter(Boolean).slice(0, 25);
   if (b.message?.trim()) {
+    await chargeAi(u.id, AI_COST.style);
     const res = await updateStyleFromChat({ guidelines: set.styleGuidelines ?? u.styleGuidelines, history: u.styleChat, message: b.message });
     reply = res.reply;
     set.styleGuidelines = res.guidelines.slice(0, 25);

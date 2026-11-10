@@ -1,8 +1,10 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
-import { encrypt } from "@/lib/crypto";
-import { currentUser, handle, requireUser } from "@/lib/session";
+import { decrypt, encrypt } from "@/lib/crypto";
+import { oauthClient } from "@/lib/google";
+import { logError } from "@/lib/errors";
+import { clearSession, currentUser, handle, requireUser } from "@/lib/session";
 import { RulesSchema, withDefaults } from "@/lib/rules";
 import { publicUser } from "@/lib/views";
 import { withAvailabilityDefaults } from "@/lib/availability";
@@ -17,17 +19,17 @@ export const GET = handle(async () => {
 const Patch = z.object({
   profile: z
     .object({
-      fullName: z.string(),
-      school: z.string(),
-      gradYear: z.string(),
-      major: z.string(),
-      hometown: z.string(),
-      pastExperience: z.string(),
-      interests: z.string(),
-      signature: z.string(),
-      phone: z.string(),
-      targeting: z.string(),
-      resumeText: z.string(),
+      fullName: z.string().max(120),
+      school: z.string().max(200),
+      gradYear: z.string().max(10),
+      major: z.string().max(200),
+      hometown: z.string().max(200),
+      pastExperience: z.string().max(4000),
+      interests: z.string().max(2000),
+      signature: z.string().max(1000),
+      phone: z.string().max(40),
+      targeting: z.string().max(4000),
+      resumeText: z.string().max(20000),
     })
     .partial()
     .optional(),
@@ -47,8 +49,8 @@ const Patch = z.object({
     })
     .partial()
     .optional(),
-  hunterKey: z.string().optional(),
-  apolloKey: z.string().optional(),
+  hunterKey: z.string().max(200).optional(),
+  apolloKey: z.string().max(200).optional(),
 });
 
 export const PATCH = handle(async (req: Request) => {
@@ -68,4 +70,27 @@ export const PATCH = handle(async (req: Request) => {
   if (body.apolloKey !== undefined) set.apolloKeyEnc = body.apolloKey ? encrypt(body.apolloKey.trim()) : null;
   const [nu] = await db.update(schema.users).set(set).where(eq(schema.users.id, u.id)).returning();
   return Response.json({ user: publicUser(nu) });
+});
+
+/**
+ * Delete account: revokes the app's Google access and permanently deletes the user and all
+ * their data (contacts, emails, resume, settings) via ON DELETE CASCADE. Emails already
+ * delivered stay in Gmail (that's the user's mailbox, not ours).
+ */
+export const DELETE = handle(async (req: Request) => {
+  const u = await requireUser();
+  const { confirm } = z.object({ confirm: z.literal(u.email) }).parse(await req.json());
+  void confirm;
+  const refresh = decrypt(u.refreshTokenEnc);
+  if (refresh) {
+    try {
+      await oauthClient().revokeToken(refresh);
+    } catch (e) {
+      logError("revoke", e);
+    }
+  }
+  const db = await getDb();
+  await db.delete(schema.users).where(eq(schema.users.id, u.id));
+  await clearSession();
+  return Response.json({ ok: true });
 });

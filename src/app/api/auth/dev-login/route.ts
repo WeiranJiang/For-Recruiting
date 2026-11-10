@@ -8,9 +8,13 @@ import { appUrl } from "@/lib/google";
  * Disabled unless DEV_LOGIN=1 and NODE_ENV !== "production".
  */
 export async function GET(req: Request) {
-  if (process.env.DEV_LOGIN !== "1" || process.env.NODE_ENV === "production") return new Response("Not found", { status: 404 });
+  // Triple-guarded: explicit flag, not a production build, not running on Vercel (preview or prod).
+  if (process.env.DEV_LOGIN !== "1" || process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    return new Response("Not found", { status: 404 });
+  }
+  const as = new URL(req.url).searchParams.get("as");
   const db = await getDb();
-  const email = "demo@example.com";
+  const email = as && /^[a-z0-9]{1,20}$/.test(as) ? `${as}@example.com` : "demo@example.com";
   let [u] = await db.select().from(schema.users).where(eq(schema.users.email, email));
   if (!u) {
     [u] = await db
@@ -96,6 +100,6 @@ export async function GET(req: Request) {
       });
     }
   }
-  await createSession(u.id);
+  await createSession(u.id, u.sessionVersion);
   return Response.redirect(`${appUrl()}/`);
 }

@@ -3,9 +3,10 @@ import { and, eq, inArray, lte, ne, isNotNull } from "drizzle-orm";
 import { getDb, schema } from "./db";
 import type { Email, User } from "./db/schema";
 import { gmailFor } from "./google";
-import { buildMime, cleanList, isValidEmail } from "./mime";
+import { buildMime, cleanList, encodeHeader, isValidEmail } from "./mime";
 import { nextSlot, withDefaults, type Booked } from "./rules";
 import { findPlaceholders, resumeFilename } from "./text-rules";
+import { HttpError } from "./errors";
 
 const ACTIVE: Email["status"][] = ["scheduled", "sending", "sent"];
 
@@ -69,6 +70,7 @@ export async function previewSlot(user: User, email: Email, bank: string): Promi
 
 export function validateEmail(e: Pick<Email, "to" | "cc" | "bcc" | "subject" | "body">): string | null {
   if (!e.to.length) return "Add at least one recipient in To.";
+  if (e.to.length + e.cc.length + e.bcc.length > 20) return "Too many recipients (20 max).";
   const bad = [...e.to, ...e.cc, ...e.bcc].filter((a) => !isValidEmail(a));
   if (bad.length) return `Invalid address: ${bad.join(", ")}`;
   if (!e.subject.trim()) return "Subject is empty.";
@@ -86,9 +88,9 @@ export async function approveEmail(user: User, emailId: string, opts: { force?: 
     .from(schema.emails)
     .innerJoin(schema.contacts, eq(schema.contacts.id, schema.emails.contactId))
     .where(and(eq(schema.emails.id, emailId), eq(schema.emails.userId, user.id)));
-  if (!row) throw new Error("Email not found");
+  if (!row) throw new HttpError(404, "Email not found");
   const { e, c } = row;
-  if (!["pending", "review", "failed"].includes(e.status)) throw new Error(`Email is already ${e.status}`);
+  if (!["pending", "review", "failed"].includes(e.status)) throw new HttpError(409, `Email is already ${e.status}`);
   const invalid = validateEmail(e);
   if (invalid) return { ok: false as const, reason: invalid };
   const dups = await findDuplicates(user, e);
@@ -120,6 +122,9 @@ export async function sendOne(user: User, emailId: string) {
   const e = claimed[0];
   if (!e) return;
   try {
+    // Re-validate at the moment of sending (defence in depth; the row may have been edited since approval).
+    const invalid = validateEmail(e);
+    if (invalid) throw new Error(invalid);
     // Re-check duplicates at the moment of sending (another tab/device may have sent in between).
     const dups = await findDuplicates(user, e);
     if (dups.length && e.kind === "initial") {
@@ -133,7 +138,7 @@ export async function sendOne(user: User, emailId: string) {
       threadId = parent?.gmailThreadId ?? undefined;
     }
     const raw = buildMime({
-      from: user.name ? `${user.name.replace(/[<>"]/g, "")} <${user.email}>` : user.email,
+      from: user.name ? `${encodeHeader(user.name.replace(/[^\p{L}\p{N} .'-]/gu, "").slice(0, 80))} <${user.email}>` : user.email,
       to: e.to,
       cc: e.cc,
       bcc: e.bcc,

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ApiError, api, fmtTime, wordCount, type EmailCard } from "./api";
+import { ApiError, api, fmtTime, safeHref, wordCount, type EmailCard } from "./api";
 import { findDateIssues, findPlaceholders } from "@/lib/text-rules";
 import { Badge, Pct, cx, toast } from "./ui";
 
@@ -106,14 +106,14 @@ export function Rationale({ e }: { e: EmailCard }) {
         <div className="flex flex-wrap gap-x-3 text-xs">
           <span className="text-muted">Sources:</span>
           {c.sources.slice(0, 6).map((s, i) => (
-            <a key={i} href={s.url} target="_blank" rel="noreferrer" className="max-w-56 truncate text-accent underline">
+            <a key={i} href={safeHref(s.url)} target="_blank" rel="noopener noreferrer" className="max-w-56 truncate text-accent underline">
               {s.title || s.url}
             </a>
           ))}
         </div>
       )}
       {c.linkedinUrl && (
-        <a href={c.linkedinUrl} target="_blank" rel="noreferrer" className="text-xs text-accent underline">
+        <a href={safeHref(c.linkedinUrl)} target="_blank" rel="noopener noreferrer" className="text-xs text-accent underline">
           LinkedIn
         </a>
       )}

@@ -27,6 +27,9 @@ send, reply, bounce and follow-up in one sheet.
    Fill in the env vars (you can leave Google ones as `x` for now and update them in step 4):
    - `ANTHROPIC_API_KEY`: from https://console.anthropic.com
    - `SESSION_SECRET`, `CRON_SECRET`: any long random strings (e.g. `openssl rand -hex 32`)
+   - `ALLOWED_EMAILS`: **required**: your email (and friends'), comma-separated, or `@yourschool.edu`. Without it nobody can sign in
+     (secure default; set `OPEN_SIGNUPS=1` only if you really want anyone with Google to use your AI credits).
+   - Optional: `AI_DAILY_LIMIT` (per-user daily AI budget in cost units, default 600).
 2. **Add a database**: in the Vercel project → *Storage* → *Create Database* → **Neon (Postgres)** → connect it to the project.
    This sets `DATABASE_URL` automatically. Tables are created on first request.
 3. **Note your URL**, e.g. `https://outreach-desk.vercel.app`.
@@ -41,7 +44,8 @@ send, reply, bounce and follow-up in one sheet.
    > **Publish app** on the consent screen to avoid that; you'll see an "unverified app" warning you can click through for personal use.
 5. **Scheduled sending**: emails send automatically while the app is open in any tab (it checks every minute).
    For sending while it's closed, Vercel's free plan only runs `vercel.json`'s cron once a day, so add a free
-   external pinger: https://cron-job.org → new job → URL `https://YOUR-APP.vercel.app/api/cron?key=YOUR_CRON_SECRET`, every 5 minutes.
+   external pinger: https://cron-job.org → new job → URL `https://YOUR-APP.vercel.app/api/cron`, every 5 minutes,
+   with a request header `Authorization: Bearer YOUR_CRON_SECRET` (keeps the secret out of URL logs).
    (On Vercel Pro you can change `vercel.json` to `*/5 * * * *` instead.)
 
 ## Run locally
@@ -62,6 +66,19 @@ npm run dev
 
 Open http://localhost:3000. Google redirect URI for local: `http://localhost:3000/api/auth/callback`.
 To click around without Google, set `DEV_LOGIN=1` and visit http://localhost:3000/api/auth/dev-login?seed=1.
+
+## Security
+
+See [SECURITY_AUDIT.md](SECURITY_AUDIT.md) (status dashboard), [SECURITY_REMEDIATION.md](SECURITY_REMEDIATION.md) (open items),
+[SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) (developer checklist) and [SECURITY.md](SECURITY.md) (reporting).
+
+```bash
+npm test
+```
+
+```bash
+npm run security:audit
+```
 
 ## Tech
 
