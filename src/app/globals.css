@@ -1,54 +1,55 @@
 @import "tailwindcss";
 
 /*
- * Aesthetic: warm paper + ink (Bear), confident editorial serif (Felt),
- * soft pastel tints and pill shapes (Structured), calm whitespace (Allume).
+ * Aesthetic: Claude help-center style. Cream paper, near-black ink, quiet grays,
+ * one coral-orange accent. Tints are cream variations, not extra colors.
  */
 :root {
-  --bg: #f6f2ea;
-  --fg: #24211d;
-  --surface: #fffdf8;
-  --surface-2: #f0eadf;
-  --line: #e6ded0;
-  --muted: #7b7266;
-  --accent: #e2574c; /* coral red, used sparingly */
-  --good: #3d8a5c;
-  --warn: #b7771c;
-  --bad: #cf4339;
-  --clarity: #3d6fd6;
+  --bg: #faf9f5;
+  --fg: #141413;
+  --surface: #ffffff;
+  --surface-2: #f0eee6;
+  --line: #e6e3da;
+  --muted: #6b6a64;
+  --accent: #d97757; /* coral / orange */
+  --good: #5b7a5e;
+  --warn: #9a6b2b;
+  --bad: #bf4d3a;
+  --clarity: #4a6fb5;
 
-  --tint-sage: #e4efe2;
-  --tint-sky: #e1ebf7;
-  --tint-butter: #faf0d3;
-  --tint-lilac: #ebe5f7;
-  --tint-peach: #fbe3da;
+  /* "tints" are all cream; peach is a whisper of the accent for errors */
+  --tint-sage: #f0eee6;
+  --tint-sky: #f0eee6;
+  --tint-butter: #f3efe4;
+  --tint-lilac: #ece9e0;
+  --tint-peach: #f8e9e2;
 
-  --shadow-soft: 0 1px 2px rgb(36 33 29 / 0.04), 0 10px 30px -14px rgb(36 33 29 / 0.18);
-  --shadow-lift: 0 2px 4px rgb(36 33 29 / 0.05), 0 24px 48px -20px rgb(36 33 29 / 0.28);
+  --shadow-soft: 0 1px 2px rgb(20 20 19 / 0.04), 0 6px 20px -12px rgb(20 20 19 / 0.12);
+  --shadow-lift: 0 1px 3px rgb(20 20 19 / 0.06), 0 18px 40px -20px rgb(20 20 19 / 0.22);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1a1815;
-    --fg: #f1ece4;
-    --surface: #23201c;
-    --surface-2: #2c2823;
-    --line: #3a342d;
-    --muted: #a59b8e;
-    --accent: #ff7b6e;
-    --good: #6cc48f;
-    --warn: #e7b25a;
-    --bad: #ff7b6e;
-    --clarity: #7fa6ff;
+    --bg: #1f1e1d;
+    --fg: #f5f4ef;
+    --surface: #262624;
+    --surface-2: #30302e;
+    --line: #3d3d3a;
+    --muted: #a6a39b;
+    --accent: #e08a6c;
+    --good: #93b496;
+    --warn: #d7a65f;
+    --bad: #e6826d;
+    --clarity: #8aa8e6;
 
-    --tint-sage: #26322a;
-    --tint-sky: #232d3a;
-    --tint-butter: #3a3222;
-    --tint-lilac: #2e2a3b;
-    --tint-peach: #3b2a25;
+    --tint-sage: #30302e;
+    --tint-sky: #30302e;
+    --tint-butter: #33312c;
+    --tint-lilac: #2d2c2a;
+    --tint-peach: #3a2a24;
 
-    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -14px rgb(0 0 0 / 0.6);
-    --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.3), 0 24px 48px -20px rgb(0 0 0 / 0.7);
+    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px -12px rgb(0 0 0 / 0.5);
+    --shadow-lift: 0 1px 3px rgb(0 0 0 / 0.35), 0 18px 40px -20px rgb(0 0 0 / 0.6);
   }
 }
 

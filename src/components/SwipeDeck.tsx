@@ -103,8 +103,8 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
         <span className="hidden sm:inline">← / → arrow keys work too</span>
       </div>
       <div className="relative">
-        {cards[1] && <div className="absolute inset-x-4 -bottom-1 top-3 rotate-[2.5deg] rounded-[28px] bg-lilac" />}
-        {cards[2] && <div className="absolute inset-x-6 -bottom-2 top-5 -rotate-[2deg] rounded-[28px] bg-sage" />}
+        {cards[1] && <div className="absolute inset-x-4 -bottom-1 top-3 rotate-[1.5deg] rounded-[28px] border border-line bg-surface-2" />}
+        {cards[2] && <div className="absolute inset-x-6 -bottom-2 top-5 -rotate-[1.5deg] rounded-[28px] border border-line bg-surface" />}
         <div
           className={cx(
             "relative touch-pan-y select-none rounded-[28px] border bg-surface p-6 shadow-lift sm:p-7",

@@ -35,7 +35,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <Card className="bg-gradient-to-br from-surface to-sky/60 lg:col-span-2">
+      <Card className="lg:col-span-2">
         <h2 className="font-display text-[32px] leading-tight">Who do you want to reach?</h2>
         <p className="mb-3 text-sm text-muted">
           Describe your targets in plain words: schools, past internships you share, groups, banks, seniority, locations, affinity networks. The

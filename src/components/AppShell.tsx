@@ -165,9 +165,7 @@ export function AppShell() {
 function Logo() {
   return (
     <span className="relative inline-flex h-10 w-10 items-center justify-center">
-      <span className="absolute inset-0 rotate-[-8deg] rounded-xl bg-lilac" />
-      <span className="absolute inset-0 rotate-[6deg] rounded-xl bg-butter" />
-      <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-fg font-display text-lg italic text-bg">O</span>
+      <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-accent font-display text-xl italic text-white">O</span>
     </span>
   );
 }
@@ -193,7 +191,7 @@ function Landing() {
 
       <section className="grid items-center gap-12 py-12 md:grid-cols-[1.1fr_1fr] md:py-20">
         <div className="animate-rise">
-          <p className="mb-5 inline-flex rounded-full bg-peach px-3 py-1 text-xs font-medium text-bad">For investment banking recruiting</p>
+          <p className="mb-5 inline-flex rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">For investment banking recruiting</p>
           <h1 className="font-display text-5xl leading-[1.02] sm:text-6xl md:text-7xl">
             Cold emails that sound <em className="text-accent">like you</em>, sent at the right time.
           </h1>
@@ -212,8 +210,8 @@ function Landing() {
       </section>
 
       <section className="grid gap-4 pb-16 sm:grid-cols-2 lg:grid-cols-4">
-        {features.map(([tint, h, p]) => (
-          <div key={h} className={cx("rounded-3xl p-6", tint)}>
+        {features.map(([, h, p]) => (
+          <div key={h} className="rounded-2xl border border-line bg-surface p-6">
             <div className="font-display text-2xl leading-tight">{h}</div>
             <div className="mt-2 text-sm leading-relaxed text-fg/70">{p}</div>
           </div>
@@ -230,15 +228,15 @@ function Landing() {
 function HeroStack() {
   return (
     <div className="relative mx-auto h-[360px] w-full max-w-md select-none" aria-hidden>
-      <div className="absolute inset-x-8 top-12 h-[320px] rotate-[7deg] rounded-3xl bg-sage" />
-      <div className="absolute inset-x-6 top-8 h-[320px] -rotate-[5deg] rounded-3xl bg-lilac" />
+      <div className="absolute inset-x-8 top-12 h-[320px] rotate-[5deg] rounded-3xl border border-line bg-surface-2" />
+      <div className="absolute inset-x-6 top-8 h-[320px] -rotate-[3deg] rounded-3xl border border-line bg-surface" />
       <div className="absolute inset-x-2 top-2 rounded-3xl border border-line/70 bg-surface p-6 shadow-lift">
         <div className="flex items-center justify-between">
           <div>
             <div className="font-semibold">Jordan Lee</div>
             <div className="text-xs text-muted">Analyst · Strategic Advisory</div>
           </div>
-          <span className="rounded-full bg-sage px-2.5 py-0.5 text-xs font-semibold text-good">92%</span>
+          <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-good">92%</span>
         </div>
         <div className="mt-4 rounded-2xl bg-surface-2 px-3 py-2 text-xs text-muted">
           Subject <span className="font-medium text-fg">Great Meeting You at PJT</span>
