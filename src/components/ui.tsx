@@ -13,10 +13,10 @@ export function Button({
   ...p
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" | "ghost" | "good"; loading?: boolean }) {
   const styles = {
-    primary: "bg-accent text-white hover:opacity-90 border-transparent",
-    good: "bg-good text-white hover:opacity-90 border-transparent",
+    primary: "bg-fg text-bg hover:opacity-85 border-transparent shadow-soft",
+    good: "bg-accent text-white hover:opacity-90 border-transparent shadow-soft",
     secondary: "bg-surface text-fg border-line hover:bg-surface-2",
-    danger: "bg-surface text-bad border-line hover:bg-bad/10",
+    danger: "bg-surface text-bad border-line hover:bg-peach",
     ghost: "bg-transparent text-muted border-transparent hover:text-fg hover:bg-surface-2",
   }[variant];
   return (
@@ -24,7 +24,7 @@ export function Button({
       {...p}
       disabled={p.disabled || loading}
       className={cx(
-        "inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         styles,
         className,
       )}
@@ -36,13 +36,13 @@ export function Button({
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx("rounded-xl border border-line bg-surface p-4 shadow-sm", className)}>{children}</div>;
+  return <div className={cx("rounded-3xl border border-line/70 bg-surface p-5 shadow-soft sm:p-6", className)}>{children}</div>;
 }
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium text-muted">{label}</span>
       {children}
       {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
     </label>
@@ -50,12 +50,12 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 }
 
 export const inputCls =
-  "w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm text-fg placeholder:text-muted/70 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
+  "w-full rounded-xl border border-line bg-bg/60 px-3.5 py-2.5 text-sm text-fg placeholder:text-muted/70 transition focus:border-fg/30 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-fg/5";
 
 export function Pct({ value, label }: { value: number; label?: string }) {
-  const tone = value >= 75 ? "bg-good/15 text-good" : value >= 50 ? "bg-warn/15 text-warn" : "bg-bad/15 text-bad";
+  const tone = value >= 75 ? "bg-sage text-good" : value >= 50 ? "bg-butter text-warn" : "bg-peach text-bad";
   return (
-    <span className={cx("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums", tone)} title={label}>
+    <span className={cx("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums", tone)} title={label}>
       {label && <span className="font-normal opacity-80">{label}</span>}
       {value}%
     </span>
@@ -65,12 +65,12 @@ export function Pct({ value, label }: { value: number; label?: string }) {
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "good" | "warn" | "bad" | "accent" }) {
   const t = {
     neutral: "bg-surface-2 text-muted",
-    good: "bg-good/15 text-good",
-    warn: "bg-warn/15 text-warn",
-    bad: "bg-bad/15 text-bad",
-    accent: "bg-accent/15 text-accent",
+    good: "bg-sage text-good",
+    warn: "bg-butter text-warn",
+    bad: "bg-peach text-bad",
+    accent: "bg-lilac text-fg",
   }[tone];
-  return <span className={cx("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", t)}>{children}</span>;
+  return <span className={cx("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", t)}>{children}</span>;
 }
 
 export function StatusBadge({ status }: { status: string }) {
@@ -107,9 +107,9 @@ export function Toaster() {
         <div
           key={t.id}
           className={cx(
-            "rounded-lg border px-4 py-2.5 text-sm shadow-lg",
-            t.tone === "good" && "border-good/40 bg-surface text-fg",
-            t.tone === "bad" && "border-bad/40 bg-surface text-bad",
+            "animate-rise rounded-2xl border px-4 py-3 text-sm shadow-lift",
+            t.tone === "good" && "border-transparent bg-fg text-bg",
+            t.tone === "bad" && "border-bad/30 bg-peach text-bad",
             t.tone === "neutral" && "border-line bg-surface text-fg",
           )}
         >
@@ -146,13 +146,13 @@ export function Chat({
   return (
     <div>
       {messages.length > 0 && (
-        <div className="mb-3 max-h-64 space-y-2 overflow-y-auto rounded-lg bg-surface-2 p-3">
+        <div className="mb-3 max-h-64 space-y-2 overflow-y-auto rounded-2xl bg-surface-2 p-3">
           {messages.map((m, i) => (
             <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
               <div
                 className={cx(
-                  "max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-1.5 text-sm",
-                  m.role === "user" ? "bg-accent text-white" : "border border-line bg-surface",
+                  "max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm",
+                  m.role === "user" ? "rounded-br-md bg-fg text-bg" : "rounded-bl-md border border-line bg-surface",
                 )}
               >
                 {m.text}
@@ -164,7 +164,7 @@ export function Chat({
       {examples && messages.length === 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
           {examples.map((e) => (
-            <button key={e} onClick={() => setText(e)} className="rounded-full border border-line px-2.5 py-1 text-xs text-muted hover:text-fg">
+            <button key={e} onClick={() => setText(e)} className="rounded-full bg-surface-2 px-3 py-1 text-xs text-muted transition hover:bg-lilac hover:text-fg">
               {e}
             </button>
           ))}
@@ -182,6 +182,15 @@ export function Chat({
           Send
         </Button>
       </form>
+    </div>
+  );
+}
+
+export function SectionTitle({ children, sub }: { children: ReactNode; sub?: ReactNode }) {
+  return (
+    <div className="mb-4">
+      <h2 className="font-display text-[26px] leading-tight">{children}</h2>
+      {sub && <p className="mt-1 text-sm text-muted">{sub}</p>}
     </div>
   );
 }

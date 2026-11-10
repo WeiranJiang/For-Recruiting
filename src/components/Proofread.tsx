@@ -92,7 +92,7 @@ export function useLiveGrammar(subject: string, body: string, opts: { initial?: 
 function Popover({ issue, onAccept, onDismiss, onClose }: { issue: GrammarIssue; onAccept: () => void; onDismiss: () => void; onClose: () => void }) {
   return (
     <span
-      className="absolute left-0 top-full z-30 mt-1 block w-72 rounded-lg border border-line bg-surface p-3 text-left text-sm font-normal not-italic text-fg shadow-xl"
+      className="absolute left-0 top-full z-30 mt-1.5 block w-72 rounded-2xl border border-line/70 bg-surface p-4 shadow-lift text-left text-sm font-normal not-italic text-fg"
       onClick={(e) => e.stopPropagation()}
     >
       <span className={cx("mb-1 block text-xs font-semibold uppercase", issue.type === "clarity" ? "text-[var(--clarity)]" : "text-bad")}>
@@ -111,10 +111,10 @@ function Popover({ issue, onAccept, onDismiss, onClose }: { issue: GrammarIssue;
       </span>
       <span className="mt-1 block text-xs text-muted">{issue.reason}</span>
       <span className="mt-2 flex gap-2">
-        <button className="rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-white" onClick={onAccept}>
+        <button className="rounded-full bg-fg px-3 py-1 text-xs font-semibold text-bg" onClick={onAccept}>
           Accept
         </button>
-        <button className="rounded-md border border-line px-2.5 py-1 text-xs" onClick={onDismiss}>
+        <button className="rounded-full border border-line px-3 py-1 text-xs" onClick={onDismiss}>
           Dismiss
         </button>
         <button className="ml-auto text-xs text-muted" onClick={onClose}>
@@ -215,7 +215,7 @@ export function HighlightTextarea({
     pos = r.end;
   });
   parts.push(value.slice(pos) + "\n");
-  const shared = "w-full whitespace-pre-wrap break-words rounded-lg border px-3 py-2 " + (className ?? "");
+  const shared = "w-full whitespace-pre-wrap break-words rounded-xl border px-3 py-2 " + (className ?? "");
   return (
     <div className="relative">
       <div aria-hidden className={cx(shared, "pointer-events-none absolute inset-0 border-transparent text-transparent")}>
@@ -259,7 +259,7 @@ export function ProofreadBar({
   const errors = issues.filter((i) => i.type !== "clarity").length;
   const clarity = issues.length - errors;
   return (
-    <div className="rounded-lg border border-line bg-surface-2 p-2.5 text-sm">
+    <div className="rounded-2xl bg-surface-2 px-4 py-3 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         {checking ? (
           <span className="inline-flex items-center gap-1.5 text-muted">
@@ -281,7 +281,7 @@ export function ProofreadBar({
           <span className="gm-dot-clarity" /> {clarity} clarity
         </span>
         {onAcceptAll && issues.length > 1 && (
-          <button className="ml-auto rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-white" onClick={onAcceptAll}>
+          <button className="ml-auto rounded-full bg-fg px-3 py-1 text-xs font-semibold text-bg" onClick={onAcceptAll}>
             Accept all
           </button>
         )}
@@ -290,7 +290,7 @@ export function ProofreadBar({
       {showList && issues.length > 0 && (
         <ul className="mt-2 space-y-1">
           {issues.map((i, k) => (
-            <li key={k} className="flex items-center gap-2 rounded-md bg-surface px-2 py-1.5 text-xs">
+            <li key={k} className="flex items-center gap-2 rounded-xl bg-surface px-3 py-2 text-xs">
               <span className={i.type === "clarity" ? "gm-dot-clarity" : "gm-dot-error"} />
               <span className="min-w-0 flex-1">
                 <span className="text-muted line-through">{i.original}</span>

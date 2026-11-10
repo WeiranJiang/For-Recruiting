@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, fmtTime, type EmailCard, type Me } from "./api";
 import { AccuracyRow, BodyStats, Rationale, Warnings, approve, useBusy } from "./EmailParts";
+import { resumeFilename } from "@/lib/text-rules";
 import { HighlightTextarea, ProofreadBar, applyIssue, useLiveGrammar } from "./Proofread";
 import type { GrammarIssue } from "./api";
 import { Badge, Button, Card, Field, cx, inputCls, toast } from "./ui";
@@ -23,7 +24,7 @@ export function ReviewPile({ me, onChange }: { me: Me; onChange: () => void }) {
   if (!list.length)
     return (
       <Card className="mx-auto max-w-xl text-center">
-        <p className="font-semibold">Review pile is empty</p>
+        <p className="font-display text-3xl">Nothing to fix</p>
         <p className="mt-1 text-sm text-muted">Emails you swipe left (or that couldn&apos;t be sent) land here for editing.</p>
       </Card>
     );
@@ -37,8 +38,8 @@ export function ReviewPile({ me, onChange }: { me: Me; onChange: () => void }) {
             key={e.id}
             onClick={() => setSel(e.id)}
             className={cx(
-              "w-full rounded-lg border p-2.5 text-left text-sm",
-              e.id === current.id ? "border-accent bg-accent/5" : "border-line bg-surface hover:bg-surface-2",
+              "w-full rounded-2xl border px-3.5 py-3 text-left text-sm transition",
+              e.id === current.id ? "border-transparent bg-surface shadow-soft" : "border-transparent bg-transparent hover:bg-surface-2",
             )}
           >
             <div className="flex items-center justify-between gap-2">
@@ -124,7 +125,7 @@ function Editor({ e, me, onDone }: { e: EmailCard; me: Me; onDone: () => void })
     <Card className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <div className="text-lg font-semibold">{e.contact.name}</div>
+          <div className="font-display text-3xl leading-tight">{e.contact.name}</div>
           <div className="text-sm text-muted">{[e.contact.title, e.contact.group, e.contact.bank].filter(Boolean).join(" · ")}</div>
         </div>
         <AccuracyRow e={e} />
@@ -152,7 +153,7 @@ function Editor({ e, me, onDone }: { e: EmailCard; me: Me; onDone: () => void })
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={attach} onChange={(x) => setAttach(x.target.checked)} />
-          Attach resume {me.resume.hasPdf ? `(${me.resume.filename})` : "(no PDF uploaded yet)"}
+          Attach resume {me.resume.hasPdf ? `(${resumeFilename(me.profile.fullName || me.name, me.resume.filename ?? "Resume.pdf")})` : "(no PDF uploaded yet)"}
         </label>
         <BodyStats body={body} />
       </div>
@@ -187,7 +188,7 @@ function Editor({ e, me, onDone }: { e: EmailCard; me: Me; onDone: () => void })
         />
       </Field>
 
-      <details className="rounded-lg border border-line p-3">
+      <details className="rounded-xl border border-line p-3">
         <summary className="cursor-pointer text-sm font-medium">Why this email? (sources, verified facts, call questions)</summary>
         <div className="mt-2">
           <Rationale e={e} />

@@ -4,6 +4,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import type { Profile, Contact, Email } from "./db/schema";
 import { RulesSchema, type Rules, renderSubject } from "./rules";
+import { findDateIssues, signatureBlock, typographize } from "./text-rules";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
 let _client: Anthropic | null = null;
@@ -236,7 +237,10 @@ You are drafting inside an outreach app. Output plain text only (no markdown). W
 Some contacts were found through web research rather than met in person: if the student's notes don't say you met,
 do NOT claim you met; write a short, honest cold email that leads with the most genuine shared connection instead,
 and list the missing context in missingInfo.
-Placeholders like [detail] are not allowed in the body; if something essential is missing, write around it and flag it in missingInfo.`;
+If a logistics detail is missing (date, time, what's attached), use a clear placeholder like [date] or [time] and list it in
+missingInfo; the app will not let the student send until placeholders are filled. Never put placeholders in place of facts
+about the recipient: write around those instead.
+End with the sign-off line, then the student's signature block exactly as given.`;
 }
 
 export async function draftEmail(input: {
@@ -248,6 +252,7 @@ export async function draftEmail(input: {
   attachResume: boolean;
   writingGuide: string;
   guidelines: string[];
+  senderEmail: string;
 }): Promise<DraftResult> {
   const { profile: p, rules: r, contact: c } = input;
   const firstName = c.name.split(/\s+/)[0] ?? "";
@@ -260,15 +265,18 @@ export async function draftEmail(input: {
     year: p.gradYear,
   });
   const resumeLine = input.attachResume
-    ? "My resume will be attached (my app setting). At most mention it in one short, low-key clause — or not at all if it would feel pushy."
+    ? "My resume is attached (app setting). Mention it briefly with the exact phrase “I’ve attached my resume” (never “attached below”), without making the email about it."
     : "No attachment. Do not mention a resume.";
+  const signature = p.signature?.trim() ? p.signature : signatureBlock(p, input.senderEmail);
   const student = `ME (the student)
 Name: ${p.fullName}; School: ${p.school} ${p.gradYear}; Major: ${p.major}; Hometown: ${p.hometown}
 Experience / affiliations I actually have: ${p.pastExperience || "(not given)"}
 Interests: ${p.interests || "(not given)"}
 Resume text (for facts about me only):
 ${p.resumeText.slice(0, 6000) || "(none)"}
-Sign-off name/signature: ${p.signature || p.fullName}`;
+First name for the sign-off: ${p.fullName.split(/\s+/)[0] || p.fullName}
+Signature block (paste exactly after the sign-off line):
+${signature}`;
 
   const person = `THE PERSON
 Name: ${c.name}
@@ -301,14 +309,16 @@ My original email (sent ${input.previous?.sentAt?.toDateString() ?? "earlier"}):
 Subject: ${input.previous?.subject}
 ${input.previous?.body}`;
 
-  return callJSON({
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const d = await callJSON({
     schema: DraftSchema,
     system: writingSystem(input.writingGuide, input.guidelines),
-    content,
+    content: `${content}\n\nToday is ${today}.`,
     effort: "medium",
     maxTokens: 12000,
     cacheSystem: true,
   });
+  return { ...d, subject: typographize(d.subject), body: typographize(d.body) };
 }
 
 // ---------------------------------------------------------------- learning the user's style
@@ -395,7 +405,7 @@ const GrammarSchema = z.object({
 })
 
 export async function grammarCheck(subject: string, body: string, guide: string, guidelines: string[]) {
-  return callJSON({
+  const res = await callJSON({
     schema: GrammarSchema,
     effort: "low",
     maxTokens: 8000,
@@ -406,10 +416,23 @@ YOUR TASK NOW: act as a meticulous copy editor for the email the user gives you.
 awkward phrasing, filler, AI-sounding phrases and tone problems according to the guide above. Score "smoothness"
 honestly (how naturally and easily it reads for a busy banker on a phone, and how human it sounds).
 Fix only what needs fixing; keep the author's voice; do not add new facts.
+Follow the guide's HOW TO RESPOND rules: keep the student's own wording when it works, report only changes that
+matter, and if the email is already good, say so plainly in "summary" with at most one or two optional tweaks.
+Prefer curly quotes/apostrophes and en dashes for ranges. Check every day-of-week/date pairing (today is ${new Date().toDateString()}).
 Keep each issue's "original" as short as possible (the misspelled word, or the clunky phrase/sentence) and copy it exactly,
 so the app can underline it. Don't report the same span twice. If the email is clean, return no issues.`,
     content: `Subject: ${subject}\n\n${body}`,
   });
+  // Deterministic weekday/date check on top of the model's review.
+  const dateIssues = findDateIssues(body).map((d) => ({
+    field: "body" as const,
+    type: "grammar" as const,
+    original: d.text,
+    suggestion: d.suggestion,
+    reason: d.message,
+  }));
+  const seen = new Set(res.issues.map((i) => i.original));
+  return { ...res, issues: [...res.issues, ...dateIssues.filter((d) => !seen.has(d.original))] };
 }
 
 // ---------------------------------------------------------------- rules chat

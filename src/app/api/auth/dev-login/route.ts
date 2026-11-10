@@ -63,7 +63,7 @@ export async function GET(req: Request) {
         to: [p.email],
         bcc: ["demo+tracker@example.com"],
         subject: `Penn Student – ${p.bank}`,
-        body: `Hi ${first},\n\nI'm a sophomore at Penn studying economcis and I'm really interested in learning more about ${p.group} at ${p.bank}. I noticed you also went to Penn, which is why I wanted to reach out to you in order to be able to hear about your experience.\n\nWould you be open to a brief 15-minute conversation sometime in the next couple of weeks?\n\nBest,\nDemo`,
+        body: `Hi ${first},\n\nI'm a sophomore at Penn studying economcis and I'm really interested in learning more about ${p.group} at ${p.bank}. I noticed you also went to Penn, which is why I wanted to reach out to you in order to be able to hear about your experience.\n\nWould you be open to a brief 15-minute conversation sometime in the next couple of weeks? I'm free Thursday, November 20th from 10:30-10:50 am ET.\n\nBest,\nDemo`,
         aiSubject: `Penn Student – ${p.bank}`,
         rationale: {
           roleAndGroup: `${p.title}, ${p.group}`,

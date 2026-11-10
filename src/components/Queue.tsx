@@ -23,7 +23,7 @@ export function Queue({ onChange }: { onChange: () => void }) {
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <Card>
-        <h2 className="mb-1 text-base font-semibold">Scheduled ({scheduled.length})</h2>
+        <h2 className="mb-1 font-display text-[26px] leading-tight">Scheduled ({scheduled.length})</h2>
         <p className="mb-3 text-xs text-muted">
           Sent automatically at these times by the background job. If the app is open, it also sends due emails every minute.
         </p>
@@ -56,7 +56,7 @@ export function Queue({ onChange }: { onChange: () => void }) {
         </ul>
       </Card>
       <Card>
-        <h2 className="mb-3 text-base font-semibold">Recently sent</h2>
+        <h2 className="mb-3 font-display text-[26px] leading-tight">Recently sent</h2>
         {sent.length === 0 && <p className="text-sm text-muted">Nothing sent yet.</p>}
         <ul className="divide-y divide-line">
           {sent.map((e) => (

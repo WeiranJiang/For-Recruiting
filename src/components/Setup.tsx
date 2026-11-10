@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { api, type Me, type Profile } from "./api";
 import { Button, Card, Chat, Field, inputCls, toast } from "./ui";
+import { resumeFilename, signatureBlock } from "@/lib/text-rules";
 
 const TARGET_EXAMPLES = [
   "Penn / Wharton alumni",
@@ -34,8 +35,8 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <Card className="lg:col-span-2">
-        <h2 className="text-base font-semibold">Who do you want to reach?</h2>
+      <Card className="bg-gradient-to-br from-surface to-sky/60 lg:col-span-2">
+        <h2 className="font-display text-[32px] leading-tight">Who do you want to reach?</h2>
         <p className="mb-3 text-sm text-muted">
           Describe your targets in plain words: schools, past internships you share, groups, banks, seniority, locations, affinity networks. The
           people search uses this every time.
@@ -51,7 +52,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
             <button
               key={t}
               onClick={() => setP({ ...p, targeting: p.targeting ? `${p.targeting.replace(/\s+$/, "")}; ${t}` : t })}
-              className="rounded-full border border-line px-2.5 py-1 text-xs text-muted hover:border-accent hover:text-fg"
+              className="rounded-full bg-surface-2 px-3 py-1 text-xs text-muted transition hover:bg-lilac hover:text-fg"
             >
               + {t}
             </button>
@@ -69,7 +70,7 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-base font-semibold">About you</h2>
+        <h2 className="mb-3 font-display text-[26px] leading-tight">About you</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Full name">
             <input className={inputCls} value={p.fullName} onChange={set("fullName")} />
@@ -86,8 +87,21 @@ export function Setup({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
           <Field label="Hometown">
             <input className={inputCls} value={p.hometown} onChange={set("hometown")} />
           </Field>
-          <Field label="Sign-off">
-            <input className={inputCls} value={p.signature} onChange={set("signature")} placeholder="Best, Your Name" />
+          <Field label="Phone (for your signature)">
+            <input className={inputCls} value={p.phone ?? ""} onChange={set("phone")} placeholder="(215) 555-0100" />
+          </Field>
+        </div>
+        <div className="mt-3">
+          <Field
+            label="Signature block"
+            hint="Leave empty to use the default built from the fields above. Check that your phone number and links look right."
+          >
+            <textarea
+              className={inputCls + " min-h-24 font-mono text-xs"}
+              value={p.signature}
+              onChange={set("signature")}
+              placeholder={signatureBlock(p, me.email)}
+            />
           </Field>
         </div>
         <div className="mt-3 grid gap-3">
@@ -135,15 +149,18 @@ function Resume({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   };
   return (
     <Card>
-      <h2 className="text-base font-semibold">Resume</h2>
+      <h2 className="font-display text-[26px] leading-tight">Resume</h2>
       <p className="mb-3 text-sm text-muted">
         Attached to every email by default (you can remove it on any card while swiping). Upload the PDF you want bankers to see; paste the text
         too so drafts can reference your experience accurately.
       </p>
-      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-surface-2 p-3 text-sm">
+      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-surface-2 p-3 text-sm">
         {me.resume.hasPdf ? (
           <>
-            <span>📎 {me.resume.filename}</span>
+            <span>
+              📎 {resumeFilename(me.profile.fullName || me.name, me.resume.filename ?? "Resume.pdf")}
+              <span className="ml-1 text-xs text-muted">(sent with this clean name; uploaded as {me.resume.filename})</span>
+            </span>
             <a className="text-accent underline" href="/api/resume" target="_blank">
               view
             </a>
@@ -198,20 +215,20 @@ function WritingStyle({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   };
   return (
     <Card className="lg:col-span-2">
-      <h2 className="text-base font-semibold">How your emails should sound</h2>
+      <h2 className="font-display text-[26px] leading-tight">How your emails should sound</h2>
       <p className="mb-3 text-sm text-muted">
         Every draft follows the master writing prompt plus your personal guidelines below. Guidelines update automatically when you edit a draft
         before swiping right, and whenever you give feedback here.
       </p>
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">Your learned guidelines ({me.styleGuidelines.length})</div>
+          <div className="mb-1 text-[13px] font-medium text-muted">Your learned guidelines ({me.styleGuidelines.length})</div>
           {me.styleGuidelines.length === 0 ? (
-            <p className="rounded-lg bg-surface-2 p-3 text-sm text-muted">None yet. Edit a draft or tell the chat what you like and dislike.</p>
+            <p className="rounded-xl bg-surface-2 p-3 text-sm text-muted">None yet. Edit a draft or tell the chat what you like and dislike.</p>
           ) : (
             <ul className="space-y-1.5">
               {me.styleGuidelines.map((g, i) => (
-                <li key={i} className="flex items-start gap-2 rounded-lg bg-surface-2 px-3 py-2 text-sm">
+                <li key={i} className="flex items-start gap-2 rounded-2xl bg-lilac px-3.5 py-2 text-sm">
                   <span className="flex-1">{g}</span>
                   <button
                     className="text-xs text-muted hover:text-bad"
@@ -226,7 +243,7 @@ function WritingStyle({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
           )}
         </div>
         <div>
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">Writing feedback</div>
+          <div className="mb-1 text-[13px] font-medium text-muted">Writing feedback</div>
           <Chat
             messages={me.styleChat}
             placeholder="e.g. Too formal. Never say 'circle back'. Keep it under 120 words."
@@ -266,12 +283,12 @@ function WritingStyle({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
 function Rules({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   return (
     <Card>
-      <h2 className="text-base font-semibold">Sending rules</h2>
+      <h2 className="font-display text-[26px] leading-tight">Sending rules</h2>
       <p className="mb-3 text-sm text-muted">
         Tell it when to send and how to space out emails to the same bank. Swiping right schedules each email in the next slot that obeys these
         rules.
       </p>
-      <ul className="mb-3 space-y-1 rounded-lg bg-surface-2 p-3 text-sm">
+      <ul className="mb-3 space-y-1.5 rounded-2xl bg-butter p-4 text-sm">
         {me.rulesSummary.map((s) => (
           <li key={s}>• {s}</li>
         ))}
@@ -325,7 +342,7 @@ function Providers({ me, onChange }: { me: Me; onChange: (m: Me) => void }) {
   };
   return (
     <Card>
-      <h2 className="text-base font-semibold">Email lookup providers (optional)</h2>
+      <h2 className="font-display text-[26px] leading-tight">Email lookup providers (optional)</h2>
       <p className="mb-3 text-sm text-muted">
         The AI finds emails from public sources and bank email formats. For verified addresses, add a Hunter.io or Apollo.io API key and choose it
         when searching. Keys are stored encrypted.

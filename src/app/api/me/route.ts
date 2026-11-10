@@ -24,6 +24,7 @@ const Patch = z.object({
       pastExperience: z.string(),
       interests: z.string(),
       signature: z.string(),
+      phone: z.string(),
       targeting: z.string(),
       resumeText: z.string(),
     })

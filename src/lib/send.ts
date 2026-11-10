@@ -5,6 +5,7 @@ import type { Email, User } from "./db/schema";
 import { gmailFor } from "./google";
 import { buildMime, cleanList, isValidEmail } from "./mime";
 import { nextSlot, withDefaults, type Booked } from "./rules";
+import { findPlaceholders, resumeFilename } from "./text-rules";
 
 const ACTIVE: Email["status"][] = ["scheduled", "sending", "sent"];
 
@@ -72,6 +73,8 @@ export function validateEmail(e: Pick<Email, "to" | "cc" | "bcc" | "subject" | "
   if (bad.length) return `Invalid address: ${bad.join(", ")}`;
   if (!e.subject.trim()) return "Subject is empty.";
   if (!e.body.trim()) return "Body is empty.";
+  const ph = findPlaceholders(`${e.subject}\n${e.body}`);
+  if (ph.length) return `Fill in ${ph.join(", ")} before sending.`;
   return null;
 }
 
@@ -139,7 +142,7 @@ export async function sendOne(user: User, emailId: string) {
       inReplyTo,
       attachment:
         e.attachResume && user.resumePdfB64
-          ? { filename: user.resumeFilename || "Resume.pdf", contentB64: user.resumePdfB64, mimeType: "application/pdf" }
+          ? { filename: resumeFilename(user.profile.fullName || user.name, user.resumeFilename || "Resume.pdf"), contentB64: user.resumePdfB64, mimeType: "application/pdf" }
           : null,
     });
     const gmail = gmailFor(user);

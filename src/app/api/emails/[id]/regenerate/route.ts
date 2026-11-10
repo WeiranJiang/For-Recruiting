@@ -29,6 +29,7 @@ export const POST = handle(async (_req: Request, ctx: RouteContext<"/api/emails/
     attachResume: row.e.attachResume,
     writingGuide: userGuide(u),
     guidelines: u.styleGuidelines,
+    senderEmail: u.email,
   });
   const [ne] = await db
     .update(schema.emails)

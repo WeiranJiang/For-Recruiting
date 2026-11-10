@@ -100,14 +100,15 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex max-w-full gap-1 overflow-x-auto rounded-full bg-surface-2 p-1">
         {VIEWS.map((v) => (
           <button
             key={v.id}
             onClick={() => setView(v.id)}
             className={cx(
-              "rounded-lg px-3 py-1.5 text-sm font-medium",
-              view === v.id ? "bg-fg text-bg" : "text-muted hover:bg-surface-2",
+              "rounded-full px-4 py-1.5 text-sm font-medium transition",
+              view === v.id ? "bg-surface text-fg shadow-soft" : "text-muted hover:text-fg",
               v.id === "flagged" && counts.flagged > 0 && view !== v.id && "text-bad",
               v.id === "followup" && counts.followup > 0 && view !== v.id && "text-accent",
             )}
@@ -115,7 +116,8 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
             {v.label} <span className="opacity-70">{counts[v.id]}</span>
           </button>
         ))}
-        <a href="/api/export" className="ml-auto text-sm text-accent underline">
+        </div>
+        <a href="/api/export" className="ml-auto rounded-full border border-line bg-surface px-4 py-1.5 text-sm font-medium hover:bg-surface-2">
           Export CSV
         </a>
       </div>
@@ -150,7 +152,7 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
       </div>
 
       {selected.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-accent/40 bg-accent/5 p-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-lilac p-2.5 pl-4 text-sm">
           <span className="font-medium">{selected.size} selected</span>
           <Button variant="primary" loading={busy} onClick={() => draft("follow_up")}>
             Draft follow-ups
@@ -164,9 +166,9 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+      <div className="overflow-x-auto rounded-3xl border border-line/70 bg-surface shadow-soft">
         <table className="w-full min-w-[960px] text-sm">
-          <thead className="border-b border-line bg-surface-2 text-xs text-muted">
+          <thead className="border-b border-line text-xs text-muted">
             <tr>
               <th className="w-8 px-2">
                 <input
@@ -198,7 +200,7 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
             {shown.map((r) => (
               <Fragment key={r.id}>
                 <tr
-                  className={cx("cursor-pointer border-b border-line hover:bg-surface-2", r.flagged && "bg-bad/5", open === r.id && "bg-surface-2")}
+                  className={cx("cursor-pointer border-b border-line hover:bg-surface-2", r.flagged && "bg-peach/50", open === r.id && "bg-surface-2")}
                   onClick={() => setOpen(open === r.id ? null : r.id)}
                 >
                   <td className="px-2" onClick={(e) => e.stopPropagation()}>
@@ -252,7 +254,7 @@ export function Tracker({ me, onChange, goSwipe }: { me: Me; onChange: () => voi
 
       {banks.length > 0 && (
         <Card>
-          <h3 className="mb-2 text-sm font-semibold">By bank</h3>
+          <h3 className="mb-3 font-display text-2xl">By bank</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-xs text-muted">
@@ -316,14 +318,14 @@ function ContactDetail({ row, onSaved }: { row: SheetRow; onSaved: () => void })
           <Badge>{row.emailSource}</Badge>
         </div>
         {row.replySnippet && (
-          <div className="rounded-lg border border-good/40 bg-good/5 p-2">
+          <div className="rounded-2xl bg-sage p-3">
             <div className="text-xs font-semibold text-good">Their reply</div>
             {row.replySnippet}
           </div>
         )}
         {row.matchReasons.length > 0 && (
           <div>
-            <div className="text-xs font-semibold uppercase text-muted">Why they match</div>
+            <div className="text-[13px] font-medium text-muted">Why they match</div>
             <ul className="ml-4 list-disc">{row.matchReasons.map((m, i) => <li key={i}>{m}</li>)}</ul>
           </div>
         )}

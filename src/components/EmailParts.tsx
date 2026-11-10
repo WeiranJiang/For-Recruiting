@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ApiError, api, fmtTime, wordCount, type EmailCard } from "./api";
+import { findDateIssues, findPlaceholders } from "@/lib/text-rules";
 import { Badge, Pct, cx, toast } from "./ui";
 
 export function Recipients({ e }: { e: Pick<EmailCard, "to" | "cc" | "bcc"> }) {
@@ -38,12 +39,15 @@ export function Warnings({ e }: { e: EmailCard }) {
     w.push({ tone: "bad", text: `Already emailed ${d.address} (${d.status}${d.when ? `, ${fmtTime(d.when)}` : ""}): “${d.subject}”` });
   if (e.contact.emailConfidence < 50) w.push({ tone: "warn", text: `Low email confidence (${e.contact.emailConfidence}%). Consider verifying it first.` });
   for (const m of e.rationale?.missingInfo ?? []) w.push({ tone: "warn", text: `Missing: ${m}` });
+  const ph = findPlaceholders(`${e.subject}\n${e.body}`);
+  if (ph.length) w.push({ tone: "bad", text: `Fill in ${ph.join(", ")} before sending (edit it from the review pile).` });
+  for (const d of findDateIssues(e.body)) w.push({ tone: "bad", text: `Date check: ${d.message}.` });
   if (e.error) w.push({ tone: "bad", text: e.error });
   if (!w.length) return null;
   return (
     <div className="space-y-1">
       {w.map((x, i) => (
-        <div key={i} className={cx("rounded-md px-2.5 py-1.5 text-xs", x.tone === "bad" ? "bg-bad/10 text-bad" : "bg-warn/10 text-warn")}>
+        <div key={i} className={cx("rounded-xl px-3 py-2 text-xs", x.tone === "bad" ? "bg-peach text-bad" : "bg-butter text-warn")}>
           {x.text}
         </div>
       ))}
@@ -76,25 +80,25 @@ export function Rationale({ e }: { e: EmailCard }) {
       )}
       {!!r?.verifiedFacts.length && (
         <div>
-          <div className="text-xs font-semibold uppercase text-muted">Verified (from sources)</div>
+          <div className="text-[13px] font-medium text-muted">Verified (from sources)</div>
           <ul className="ml-4 list-disc">{r.verifiedFacts.map((f, i) => <li key={i}>{f}</li>)}</ul>
         </div>
       )}
       {!!r?.fromMyNotes.length && (
         <div>
-          <div className="text-xs font-semibold uppercase text-muted">From your notes</div>
+          <div className="text-[13px] font-medium text-muted">From your notes</div>
           <ul className="ml-4 list-disc">{r.fromMyNotes.map((f, i) => <li key={i}>{f}</li>)}</ul>
         </div>
       )}
       {!!c.matchReasons.length && (
         <div>
-          <div className="text-xs font-semibold uppercase text-muted">Matched your targeting because</div>
+          <div className="text-[13px] font-medium text-muted">Matched your targeting because</div>
           <ul className="ml-4 list-disc">{c.matchReasons.map((f, i) => <li key={i}>{f}</li>)}</ul>
         </div>
       )}
       {!!r?.followUpQuestions.length && (
         <div>
-          <div className="text-xs font-semibold uppercase text-muted">Questions for the 15-min call</div>
+          <div className="text-[13px] font-medium text-muted">Questions for the 15-min call</div>
           <ul className="ml-4 list-disc">{r.followUpQuestions.map((f, i) => <li key={i}>{f}</li>)}</ul>
         </div>
       )}

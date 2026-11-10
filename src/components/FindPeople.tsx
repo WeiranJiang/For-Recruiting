@@ -55,8 +55,8 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
             onClick={() => setProvider(id)}
             title={ok ? "" : "Add an API key in Setup first"}
             className={cx(
-              "rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40",
-              provider === id ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-fg",
+              "rounded-full border px-3.5 py-1.5 text-sm transition disabled:opacity-40",
+              provider === id ? "border-transparent bg-fg text-bg" : "border-line text-muted hover:text-fg",
             )}
           >
             {label}
@@ -68,7 +68,11 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <div className="flex gap-2">
+      <div className="text-center">
+        <h2 className="font-display text-4xl">Who should you meet?</h2>
+        <p className="mt-2 text-sm text-muted">Search the web with your targeting, or paste a list you already have.</p>
+      </div>
+      <div className="mx-auto flex w-fit gap-1 rounded-full bg-surface-2 p-1">
         {(
           [
             ["search", "Search the web"],
@@ -78,7 +82,7 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
           <button
             key={id}
             onClick={() => setMode(id)}
-            className={cx("rounded-lg px-3 py-1.5 text-sm font-medium", mode === id ? "bg-fg text-bg" : "text-muted hover:bg-surface-2")}
+            className={cx("rounded-full px-4 py-1.5 text-sm font-medium transition", mode === id ? "bg-surface text-fg shadow-soft" : "text-muted hover:text-fg")}
           >
             {label}
           </button>
@@ -87,8 +91,8 @@ export function FindPeople({ me, onDone, goSetup }: { me: Me; onDone: () => void
 
       {mode === "search" ? (
         <Card className="space-y-4">
-          <div className="rounded-lg bg-surface-2 p-3 text-sm">
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">Your standing targeting</div>
+          <div className="rounded-2xl bg-sky p-4 text-sm">
+            <div className="mb-1 text-[13px] font-medium text-muted">Your standing targeting</div>
             {me.profile.targeting ? (
               <p>{me.profile.targeting}</p>
             ) : (

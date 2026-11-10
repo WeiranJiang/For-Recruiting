@@ -105,6 +105,7 @@ export async function createDraft(user: User, contact: Contact, kind: "initial" 
     attachResume,
     writingGuide: userGuide(user),
     guidelines: user.styleGuidelines,
+    senderEmail: user.email,
   });
   const subject =
     kind === "follow_up" && parent ? (/^re:/i.test(parent.subject) ? parent.subject : `Re: ${parent.subject}`) : d.subject;

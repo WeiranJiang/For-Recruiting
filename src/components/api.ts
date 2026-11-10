@@ -29,6 +29,7 @@ export type Profile = {
   pastExperience: string;
   interests: string;
   signature: string;
+  phone?: string;
   targeting: string;
   resumeText: string;
 };

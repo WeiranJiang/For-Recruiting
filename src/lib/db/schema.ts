@@ -19,6 +19,7 @@ export type Profile = {
   pastExperience: string; // past internships / clubs, free text
   interests: string; // groups / products of interest
   signature: string;
+  phone?: string;
   /** Free-text description of who to reach out to (schools, past internships, groups, affinity orgs ...). */
   targeting: string;
   resumeText: string;
@@ -33,6 +34,7 @@ export const EMPTY_PROFILE: Profile = {
   pastExperience: "",
   interests: "",
   signature: "",
+  phone: "",
   targeting: "",
   resumeText: "",
 };

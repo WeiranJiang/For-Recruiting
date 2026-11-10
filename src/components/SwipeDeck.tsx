@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, fmtTime, type EmailCard, type Me } from "./api";
 import { AccuracyRow, BodyStats, Rationale, Recipients, Warnings, approve, useBusy } from "./EmailParts";
+import { resumeFilename } from "@/lib/text-rules";
 import { HighlightedText, ProofreadBar, applyIssue, useLiveGrammar } from "./Proofread";
 import type { GrammarIssue } from "./api";
 import { Badge, Button, Card, cx, toast } from "./ui";
@@ -77,7 +78,7 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
   if (!top)
     return (
       <Card className="mx-auto max-w-xl text-center">
-        <p className="text-lg font-semibold">No drafts waiting</p>
+        <p className="font-display text-3xl">All caught up</p>
         <p className="mt-1 text-sm text-muted">Find people to get new drafts, or draft follow-ups from the Tracker sheet.</p>
         <Button variant="primary" className="mt-4" onClick={goFind}>
           Find people
@@ -102,11 +103,12 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
         <span className="hidden sm:inline">← / → arrow keys work too</span>
       </div>
       <div className="relative">
-        {cards[1] && <div className="absolute inset-x-3 -bottom-2 top-2 rounded-xl border border-line bg-surface opacity-60" />}
+        {cards[1] && <div className="absolute inset-x-4 -bottom-1 top-3 rotate-[2.5deg] rounded-[28px] bg-lilac" />}
+        {cards[2] && <div className="absolute inset-x-6 -bottom-2 top-5 -rotate-[2deg] rounded-[28px] bg-sage" />}
         <div
           className={cx(
-            "relative touch-pan-y select-none rounded-xl border bg-surface p-5 shadow-lg",
-            hint === "send" ? "border-good" : hint === "review" ? "border-warn" : "border-line",
+            "relative touch-pan-y select-none rounded-[28px] border bg-surface p-6 shadow-lift sm:p-7",
+            hint === "send" ? "border-accent" : hint === "review" ? "border-warn" : "border-line/70",
           )}
           style={{
             transform: `translateX(${offset}px) rotate(${offset / 30}deg)`,
@@ -132,8 +134,8 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
           {hint && (
             <div
               className={cx(
-                "absolute top-4 rounded-md border-2 px-2 py-0.5 text-sm font-bold uppercase",
-                hint === "send" ? "right-4 border-good text-good" : "left-4 border-warn text-warn",
+                "absolute top-5 rounded-full px-3 py-1 text-sm font-semibold",
+                hint === "send" ? "right-5 bg-accent text-white" : "left-5 bg-butter text-warn",
               )}
             >
               {hint === "send" ? "Send ✓" : "Edit later"}
@@ -141,7 +143,7 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
           )}
           <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
             <div>
-              <div className="text-lg font-semibold">{top.contact.name}</div>
+              <div className="font-display text-3xl leading-tight">{top.contact.name}</div>
               <div className="text-sm text-muted">
                 {[top.contact.title, top.contact.group, top.contact.bank].filter(Boolean).join(" · ")}
               </div>
@@ -157,7 +159,7 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
             <ProofedContent
               key={top.id}
               e={top}
-              resumeName={me.resume.hasPdf ? (me.resume.filename ?? "Resume.pdf") : null}
+              resumeName={me.resume.hasPdf ? resumeFilename(me.profile.fullName || me.name, me.resume.filename ?? "Resume.pdf") : null}
               patch={patch}
             />
             <div className="flex flex-wrap gap-2">
@@ -166,7 +168,7 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
               </Button>
             </div>
             {showWhy && (
-              <div className="rounded-lg border border-line p-3">
+              <div className="rounded-xl border border-line p-3">
                 <Rationale e={top} />
               </div>
             )}
@@ -174,7 +176,7 @@ export function SwipeDeck({ me, onChange, goFind }: { me: Me; onChange: () => vo
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-8 grid grid-cols-3 gap-3">
         <Button className="py-3" onClick={swipeLeft} loading={busy === "left"}>
           ← Edit later
         </Button>
@@ -228,7 +230,7 @@ function ProofedContent({
   const bodyIssues = issues.filter((i) => i.field === "body");
   return (
     <>
-      <div className="rounded-lg bg-surface-2 p-3">
+      <div className="rounded-2xl bg-surface-2 p-4">
         <Recipients e={e} />
         <div className="mt-2 border-t border-line pt-2 text-sm">
           <span className="text-muted">Subject </span>
@@ -241,14 +243,14 @@ function ProofedContent({
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 text-sm">
         <div className="flex flex-wrap items-center gap-2">
           {e.attachResume ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1">
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1">
               {resumeName ? <>📎 {resumeName}</> : <span className="text-warn">📎 Resume (upload it in Setup first)</span>}
               <button className="ml-1 text-muted hover:text-bad" title="Don't attach the resume to this email" onClick={() => patch({ attachResume: false })}>
                 ✕
               </button>
             </span>
           ) : (
-            <button className="rounded-md border border-dashed border-line px-2 py-1 text-muted hover:text-fg" onClick={() => patch({ attachResume: true })}>
+            <button className="rounded-full border border-dashed border-line px-3 py-1 text-muted hover:text-fg" onClick={() => patch({ attachResume: true })}>
               + attach resume
             </button>
           )}

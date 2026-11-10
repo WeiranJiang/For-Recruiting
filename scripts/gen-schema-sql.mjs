@@ -2,7 +2,7 @@
 // Usage: npx drizzle-kit generate && node scripts/gen-schema-sql.mjs
 import fs from "node:fs";
 const files = fs.readdirSync("drizzle").filter((f) => f.endsWith(".sql")).sort();
-let sql = files.map((f) => fs.readFileSync(`drizzle/${f}`, "utf8")).join("\n");
+let sql = files.map((f) => fs.readFileSync(`drizzle/${f}`, "utf8")).join("\n--> statement-breakpoint\n");
 const stmts = sql.split("--> statement-breakpoint").map((s) => s.trim()).filter(Boolean);
 const out = [];
 for (let s of stmts) {
