@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f6f7f9;
+  --fg: #111827;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --line: #e2e5ea;
+  --muted: #5f6b7a;
+  --accent: #1d4ed8;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6e9ee;
+    --surface: #151b23;
+    --surface-2: #1c2430;
+    --line: #2a3441;
+    --muted: #94a0b2;
+    --accent: #6c9cff;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Live proofreading underlines (Grammarly-style) */
+:root {
+  --clarity: #2563eb;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --clarity: #60a5fa;
+  }
+}
+.gm-error,
+.gm-clarity {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  text-decoration-skip-ink: none;
+}
+.gm-error {
+  text-decoration-color: var(--bad);
+}
+.gm-clarity {
+  text-decoration-color: var(--clarity);
+}
+.gm-error.cursor-pointer:hover {
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+}
+.gm-clarity.cursor-pointer:hover {
+  background: color-mix(in srgb, var(--clarity) 12%, transparent);
+}
+.gm-dot-error,
+.gm-dot-clarity {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.gm-dot-error {
+  background: var(--bad);
+}
+.gm-dot-clarity {
+  background: var(--clarity);
+}
