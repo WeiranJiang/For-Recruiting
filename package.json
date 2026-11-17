@@ -13,7 +13,7 @@
     "security:smoke": "node scripts/security-smoke.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.7.0",
+    "@anthropic-ai/sdk": "^1.8.0",
     "@electric-sql/pglite": "^0.5.16",
     "drizzle-orm": "^0.45.4",
     "googleapis": "^189.0.0",
@@ -21,7 +21,7 @@
     "luxon": "^3.7.2",
     "next": "16.4.6",
     "pdf-lib": "^1.17.1",
-    "postgres": "^4.1.0",
+    "postgres": "^4.1.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "server-only": "^0.0.1",
